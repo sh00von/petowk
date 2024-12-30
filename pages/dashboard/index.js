@@ -610,10 +610,18 @@ export default function Dashboard() {
               </div>
               <div className="flex items-center space-x-4">
                 <CreatePetModal onSave={savePetInfo} trigger={
-                  <Button variant="outline" size="sm" className="hidden md:flex bg-indigo-50 text-black hover:bg-indigo-100 rounded-xl">
-                    <Plus className="mr-2 h-4 w-4" />
-                    Add Pet
-                  </Button>
+                  <Button
+  variant="outline"
+  size="sm"
+  className="hidden md:flex bg-indigo-500 text-white border-indigo-600 hover:bg-indigo-600 hover:text-gray-100 rounded-xl shadow-sm hover:shadow-md transform hover:scale-105 transition duration-300 ease-in-out"
+>
+  <Plus className="mr-2 h-4 w-4 text-white transition-transform duration-300 ease-in-out transform hover:scale-125" color='white'/>
+  Add Pet
+</Button>
+
+
+
+
                 } />
                 <Button variant="ghost" size="icon" className="text-black hover:bg-indigo-100 hover:text-black rounded-xl">
                   <Bell className="h-5 w-5" />
@@ -706,7 +714,7 @@ export default function Dashboard() {
                       </Button>
                     ) : (
                       <CreatePetModal onSave={savePetInfo} trigger={
-                        <Button className="bg-indigo-500 hover:bg-indigo-600 text-black shadow-md text-lg py-2 px-6">
+                        <Button className="bg-indigo-500 hover:bg-indigo-600 text-white shadow-md text-lg py-2 px-6">
                           Add Your First Pet
                         </Button>
                       } />
