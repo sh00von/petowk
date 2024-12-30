@@ -42,6 +42,7 @@ import Link from 'next/link'
 import { Features } from '../../components/features'
 import CreatePetModal from '../../components/create-pet-modal';
 import { sanitizeHtml } from '../../lib/sanitizeHtml';
+import { Helmet } from 'react-helmet';
 
 
 
@@ -188,7 +189,7 @@ export default function Dashboard() {
               <h2 className="text-2xl font-semibold text-red-600 mb-4">You are not logged in</h2>
               <p className="text-black mb-6">Please log in or sign up to access PETOWK's features and start caring for your pets with AI assistance.</p>
               <div className="flex justify-center space-x-4">
-                <Button asChild className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-6 rounded-lg shadow-md transition duration-200">
+                <Button asChild className="bg-blue-500 hover:bg-blue-600 text-black py-2 px-6 rounded-lg shadow-md transition duration-200">
                   <Link href="../">Log In</Link>
                 </Button>
                 <Button asChild variant="outline" className="bg-white hover:bg-gray-100 text-black py-2 px-6 rounded-lg shadow-md transition duration-200">
@@ -205,24 +206,37 @@ export default function Dashboard() {
 
   return (
     <div className="flex h-screen bg-gray-100 text-black">
+      <Helmet>
+        <style>{`
+          body {
+            font-family: 'Times New Roman', serif;
+          }
+          * {
+            color: black;
+          }
+          a:hover {
+            color: #4F46E5; /* indigo-600 */
+          }
+        `}</style>
+      </Helmet>
       <aside className="hidden md:flex w-16 bg-gray-50 shadow-md flex-col items-center py-6 space-y-6  border border-r-4 border-gray-300">
-        <Button variant="ghost" size="icon" className="text-indigo-600 hover:bg-indigo-100 hover:text-indigo-700 transition-colors duration-200">
+        <Button variant="ghost" size="icon" className="text-black hover:bg-indigo-100 hover:text-black transition-colors duration-200">
           <MessageCircle className="h-6 w-6" />
         </Button>
-        <Button variant="ghost" size="icon" className="text-indigo-600 hover:bg-indigo-100 hover:text-indigo-700 transition-colors duration-200">
+        <Button variant="ghost" size="icon" className="text-black hover:bg-indigo-100 hover:text-black transition-colors duration-200">
           <Users className="h-6 w-6" />
         </Button>
-        <Button variant="ghost" size="icon" className="text-indigo-600 hover:bg-indigo-100 hover:text-indigo-700 transition-colors duration-200">
+        <Button variant="ghost" size="icon" className="text-black hover:bg-indigo-100 hover:text-black transition-colors duration-200">
           <Bell className="h-6 w-6" />
         </Button>
         <Separator className="my-4 w-full bg-gray-200" />
-        <Button variant="ghost" size="icon" className="text-indigo-600 hover:bg-indigo-100 hover:text-indigo-700 transition-colors duration-200" onClick={toggleDetailSidebar}>
+        <Button variant="ghost" size="icon" className="text-black hover:bg-indigo-100 hover:text-black transition-colors duration-200" onClick={toggleDetailSidebar}>
           <Menu className="h-6 w-6" />
         </Button>
-        <Button variant="ghost" size="icon" className="text-indigo-600 hover:bg-indigo-100 hover:text-indigo-700 transition-colors duration-200">
+        <Button variant="ghost" size="icon" className="text-black hover:bg-indigo-100 hover:text-black transition-colors duration-200">
           <Sun className="h-6 w-6" />
         </Button>
-        <Button variant="ghost" size="icon" className="text-indigo-600 hover:bg-indigo-100 hover:text-indigo-700 transition-colors duration-200">
+        <Button variant="ghost" size="icon" className="text-black hover:bg-indigo-100 hover:text-black transition-colors duration-200">
           <LogOut className="h-6 w-6" />
         </Button>
       </aside>
@@ -241,13 +255,13 @@ export default function Dashboard() {
                 <AvatarFallback>H</AvatarFallback>
               </Avatar>
               <div>
-                <div className="text-sm text-indigo-600">Welcome,</div>
-                <div className="font-medium text-indigo-900">{session?.user?.name || "User"}</div>
+                <div className="text-sm text-black">Welcome,</div>
+                <div className="font-medium text-black">{session?.user?.name || "User"}</div>
               </div>
             </div>
 
             <div className="space-y-4 bg-white p-4 rounded-xl shadow-sm">
-              <h3 className="text-lg font-semibold text-indigo-900">Your Pets</h3>
+              <h3 className="text-lg font-semibold text-black">Your Pets</h3>
               {pets.length > 0 ? (
                 <div className="space-y-3">
                   {pets.map((pet) => (
@@ -263,18 +277,18 @@ export default function Dashboard() {
                         onClick={() => handlePetClick(pet.petName, pet.petAge)}
                       >
                         <div
-                          className={`font-medium ${selectedPet && selectedPet.petName === pet.petName ? 'text-indigo-900' : 'text-indigo-900'
+                          className={`font-medium ${selectedPet && selectedPet.petName === pet.petName ? 'text-black' : 'text-black'
                             }`}
                         >
                           {pet.petName}
                         </div>
-                        <div className="text-xs text-indigo-900">{`Age: ${pet.petAge} months`}</div>
+                        <div className="text-sm text-black">{`Age: ${pet.petAge} months`}</div>
                       </div>
                       <div className="flex items-center space-x-2">
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="text-indigo-900 hover:text-indigo-900 hover:bg-indigo-100"
+                          className="text-black hover:text-black hover:bg-indigo-100"
                         >
                           <Settings className="h-4 w-4" />
                         </Button>
@@ -283,7 +297,7 @@ export default function Dashboard() {
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="text-indigo-900 hover:text-indigo-900 hover:bg-indigo-100"
+                              className="text-black hover:text-black hover:bg-indigo-100"
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>
@@ -291,14 +305,14 @@ export default function Dashboard() {
                           <AlertDialogContent className="bg-white">
                             <AlertDialogHeader>
                               <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                              <AlertDialogDescription className="text-indigo-900">
+                              <AlertDialogDescription className="text-black">
                                 This action cannot be undone. This will permanently delete your pet's data.
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
-                              <AlertDialogCancel className="bg-indigo-100 text-indigo-900 hover:bg-indigo-200">Cancel</AlertDialogCancel>
+                              <AlertDialogCancel className="bg-indigo-100 text-black hover:bg-indigo-200">Cancel</AlertDialogCancel>
                               <AlertDialogAction
-                                className="bg-red-600 text-white hover:bg-red-700"
+                                className="bg-red-600 text-black hover:bg-red-700"
                                 onClick={() => deletePet(pet._id)}
                               >
                                 Delete
@@ -311,12 +325,12 @@ export default function Dashboard() {
                   ))}
                 </div>
               ) : (
-                <p className="text-indigo-900 text-sm">No pets added yet.</p>
+                <p className="text-black text-sm">No pets added yet.</p>
               )}
             </div>
 
             <div className="space-y-4 bg-white p-4 rounded-xl shadow-sm">
-              <h4 className="text-lg font-semibold text-indigo-900">Add a New Pet</h4>
+              <h4 className="text-lg font-semibold text-black">Add a New Pet</h4>
 
               <form onSubmit={(e) => {
                 e.preventDefault();
@@ -326,7 +340,7 @@ export default function Dashboard() {
                   placeholder="Pet Name"
                   value={petName}
                   onChange={(e) => setPetName(e.target.value)}
-                  className="bg-indigo-100 border-indigo-300 text-indigo-900 placeholder-indigo-400 rounded-xl shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  className="bg-indigo-100 border-indigo-300 text-black placeholder-indigo-400 rounded-xl shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                   required
                 />
                 <Input
@@ -334,25 +348,25 @@ export default function Dashboard() {
                   type="number"
                   value={petAge}
                   onChange={(e) => setPetAge(e.target.value)}
-                  className="bg-indigo-100 rounded-xl border-indigo-300 text-indigo-900 placeholder-indigo-400  shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  className="bg-indigo-100 rounded-xl border-indigo-300 text-black placeholder-indigo-400  shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                   required
                 />
                 <Button
                   type="submit"
                   variant="outline"
-                  className="w-full justify-start gap-2 border-indigo-300 text-indigo-900 hover:text-indigo-900 hover:bg-indigo-200 rounded-xl shadow-sm"
+                  className="w-full justify-start gap-2 border-indigo-300 text-black hover:text-black hover:bg-indigo-200 rounded-xl shadow-sm"
                 >
                   <Plus className="h-4 w-4" />
                   Add Pet
                 </Button>
               </form>
 
-              {message && <p className="text-indigo-600 text-sm mt-2">{message}</p>}
+              {message && <p className="text-black text-sm mt-2">{message}</p>}
             </div>
             <div className="space-y-4 bg-white p-4 rounded-xl shadow-sm">
-              <h4 className="text-lg font-semibold text-indigo-900">Select AI Model</h4>
+              <h4 className="text-lg font-semibold text-black">Select AI Model</h4>
               <Select>
-                <SelectTrigger className="w-full bg-indigo-100 border-indigo-300 text-indigo-900 rounded-xl">
+                <SelectTrigger className="w-full bg-indigo-100 border-indigo-300 text-black rounded-xl">
                   <SelectValue placeholder="Select an AI model" />
                 </SelectTrigger>
                 <SelectContent className="bg-white rounded-xl border-indigo-200">
@@ -402,12 +416,12 @@ export default function Dashboard() {
                   </Avatar>
                   <div>
                     <div className="text-sm text-black">Welcome,</div>
-                    <div className="font-medium text-indigo-900">{session?.user?.name || "User"}</div>
+                    <div className="font-medium text-black">{session?.user?.name || "User"}</div>
                   </div>
                 </div>
 
                 <div className="space-y-4">
-                  <h3 className="text-lg font-semibold text-indigo-900">Your Pets</h3>
+                  <h3 className="text-lg font-semibold text-black">Your Pets</h3>
                   {pets.length > 0 ? (
                     <div className="space-y-3">
                       {pets.map((pet) => (
@@ -423,18 +437,18 @@ export default function Dashboard() {
                             onClick={() => handlePetClick(pet.petName, pet.petAge)}
                           >
                             <div
-                              className={`font-medium ${selectedPet && selectedPet.petName === pet.petName ? 'text-indigo-900' : 'text-black'
+                              className={`font-medium ${selectedPet && selectedPet.petName === pet.petName ? 'text-black' : 'text-black'
                                 }`}
                             >
                               {pet.petName}
                             </div>
-                            <div className="text-xs text-black">{`Age: ${pet.petAge} months`}</div>
+                            <div className="text-sm text-black">{`Age: ${pet.petAge} months`}</div>
                           </div>
                           <div className="flex items-center space-x-2">
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="text-black hover:text-indigo-900 hover:bg-indigo-100"
+                              className="text-black hover:text-black hover:bg-indigo-100"
                             >
                               <Settings className="h-4 w-4" />
                             </Button>
@@ -443,7 +457,7 @@ export default function Dashboard() {
                                 <Button
                                   variant="ghost"
                                   size="icon"
-                                  className="text-black hover:text-indigo-900 hover:bg-indigo-100"
+                                  className="text-black hover:text-black hover:bg-indigo-100"
                                 >
                                   <Trash2 className="h-4 w-4" />
                                 </Button>
@@ -458,7 +472,7 @@ export default function Dashboard() {
                                 <AlertDialogFooter>
                                   <AlertDialogCancel className="bg-indigo-100 text-black hover:bg-indigo-200">Cancel</AlertDialogCancel>
                                   <AlertDialogAction
-                                    className="bg-red-600 text-white hover:bg-red-700"
+                                    className="bg-red-600 text-black hover:bg-red-700"
                                     onClick={() => deletePet(pet._id)}
                                   >
                                     Delete
@@ -477,7 +491,7 @@ export default function Dashboard() {
               </div>
 
               <div className="space-y-4 bg-white p-4 rounded-xl shadow-sm">
-                <h4 className="text-lg font-semibold text-indigo-900">Add a New Pet</h4>
+                <h4 className="text-lg font-semibold text-black">Add a New Pet</h4>
                 <form onSubmit={(e) => {
                   e.preventDefault();
                   savePetInfo(petName, petAge);
@@ -486,7 +500,7 @@ export default function Dashboard() {
                     placeholder="Pet Name"
                     value={petName}
                     onChange={(e) => setPetName(e.target.value)}
-                    className="bg-indigo-100 border-indigo-300 text-indigo-900 placeholder-indigo-400 rounded-xl shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    className="bg-indigo-100 border-indigo-300 text-black placeholder-indigo-400 rounded-xl shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                     required
                   />
                   <Input
@@ -494,25 +508,25 @@ export default function Dashboard() {
                     type="number"
                     value={petAge}
                     onChange={(e) => setPetAge(e.target.value)}
-                    className="bg-indigo-100 rounded-xl border-indigo-300 text-indigo-900 placeholder-indigo-400 shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    className="bg-indigo-100 rounded-xl border-indigo-300 text-black placeholder-indigo-400 shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                     required
                   />
                   <Button
                     type="submit"
                     variant="outline"
-                    className="w-full justify-start gap-2 border-indigo-300 text-indigo-900 hover:text-indigo-900 hover:bg-indigo-200 rounded-xl shadow-sm"
+                    className="w-full justify-start gap-2 border-indigo-300 text-black hover:text-black hover:bg-indigo-200 rounded-xl shadow-sm"
                   >
                     <Plus className="h-4 w-4" />
                     Add Pet
                   </Button>
                 </form>
-                {message && <p className="text-indigo-600 text-sm mt-2">{message}</p>}
+                {message && <p className="text-black text-sm mt-2">{message}</p>}
               </div>
 
               <div className="space-y-4 bg-white p-4 rounded-xl shadow-sm">
-                <h4 className="text-lg font-semibold text-indigo-900">Select AI Model</h4>
+                <h4 className="text-lg font-semibold text-black">Select AI Model</h4>
                 <Select>
-                  <SelectTrigger className="w-full bg-indigo-100 border-indigo-300 text-indigo-900 rounded-xl">
+                  <SelectTrigger className="w-full bg-indigo-100 border-indigo-300 text-black rounded-xl">
                     <SelectValue placeholder="Select an AI model" />
                   </SelectTrigger>
                   <SelectContent className="bg-white rounded-xl border-indigo-200">
@@ -589,7 +603,7 @@ export default function Dashboard() {
           <div className="container mx-auto px-4">
             <div className="flex items-center justify-between h-16">
               <div className="flex items-center">
-                <Link href="/" className="flex items-center">
+                <Link href="/" className="flex items-center px-12">
                   <PawPrint className="h-8 w-8 text-black mr-2" />
                   <h1 className="text-xl font-bold text-black">PETOWK</h1>
                 </Link>
@@ -655,7 +669,7 @@ export default function Dashboard() {
                         >
                           <div
                             className={`max-w-[80%] p-4 rounded-xl shadow-lg ${message.role === 'user'
-                                ? 'bg-indigo-500 text-white self-end rounded-br-none' // User message with rounded bottom right corner
+                                ? 'bg-indigo-500 text-black self-end rounded-br-none' // User message with rounded bottom right corner
                                 : 'bg-white text-black border border-gray-300 self-start rounded-bl-none' // Bot message with rounded bottom left corner
                               }`}
                           >
@@ -683,16 +697,16 @@ export default function Dashboard() {
                     <h2 className="text-3xl font-bold mb-4 text-black">Welcome to PETOWK</h2>
                     <p className="text-black text-lg mb-8">
                       {pets.length > 0
-                        ? "Select a pet from the sidebar to startchatting with our AI Vet."
+                        ? "Select a pet from the sidebar to start chatting with our AI Vet."
                         : "You haven't added any pets yet. Create your first pet to get started!"}
                     </p>
                     {pets.length > 0 ? (
-                      <Button onClick={() => setIsDetailSidebarOpen(true)} className="bg-indigo-500 hover:bg-indigo-600 text-white shadow-md text-lg py-2 px-6">
+                      <Button onClick={() => setIsDetailSidebarOpen(true)} className="bg-indigo-500 hover:bg-indigo-600 text-black shadow-md text-lg py-2 px-6">
                         Select a Pet
                       </Button>
                     ) : (
                       <CreatePetModal onSave={savePetInfo} trigger={
-                        <Button className="bg-indigo-500 hover:bg-indigo-600 text-white shadow-md text-lg py-2 px-6">
+                        <Button className="bg-indigo-500 hover:bg-indigo-600 text-black shadow-md text-lg py-2 px-6">
                           Add Your First Pet
                         </Button>
                       } />
@@ -711,10 +725,10 @@ export default function Dashboard() {
     {/* Query Type Select */}
     <div className="col-span-4 md:col-span-1">
     <Select value={queryType} onValueChange={setQueryType}>
-        <SelectTrigger className="w-full bg-indigo-100 border-indigo-300 rounded-xl shadow-md text-indigo-900 hover:bg-indigo-200 px-6 py-4 text-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none transition-colors duration-200">
+        <SelectTrigger className="w-full bg-indigo-100 border-indigo-300 rounded-xl shadow-md text-black hover:bg-indigo-200 px-6 py-4 text-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none transition-colors duration-200">
           <SelectValue placeholder="Choose a query type" />
         </SelectTrigger>
-        <SelectContent className="bg-white border border-indigo-200 rounded-xl shadow-lg text-indigo-900">
+        <SelectContent className="bg-white border border-indigo-200 rounded-xl shadow-lg text-black">
           <SelectItem className="hover:bg-indigo-100 focus:bg-indigo-200 rounded-xl" value="symptom">Symptom</SelectItem>
           <SelectItem className="hover:bg-indigo-100 focus:bg-indigo-200 rounded-xl" value="food">Food</SelectItem>
           <SelectItem className="hover:bg-indigo-100 focus:bg-indigo-200 rounded-xl" value="nutrition">Nutrition</SelectItem>
@@ -728,21 +742,23 @@ export default function Dashboard() {
         placeholder={placeholderText}
         value={inputValue}
         onChange={(e) => setInputValue(e.target.value)}
-        className="w-full bg-indigo-100 border-2 border-indigo-300 text-indigo-900 placeholder-indigo-400 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 rounded-xl py-4 px-6 text-lg shadow-sm"
+        className="w-full bg-indigo-100 border-2 border-indigo-300 text-black placeholder-indigo-400 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 rounded-xl py-4 px-6 text-lg shadow-sm"
         disabled={!selectedPet || isLoading}
       />
 
       {/* Send Button */}
       <Button
-        type="submit"
-        className="bg-indigo-600 hover:bg-indigo-800 text-white rounded-xl px-4 py-5 font-semibold text-lg shadow-lg hover:shadow-2xl transform hover:scale-110 transition duration-300 ease-in-out"
-        disabled={!selectedPet || isLoading}
-      >
-        <span className="flex items-center gap-3">
-          <PawPrint className="h-16 w-16 text-white mr-3" />
-          Send
-        </span>
-      </Button>
+  type="submit"
+  className="bg-indigo-600 hover:bg-indigo-800 text-white rounded-xl px-4 py-5 font-semibold text-lg shadow-lg hover:shadow-2xl transform hover:scale-110 transition duration-300 ease-in-out"
+  disabled={!selectedPet || isLoading}
+>
+  <span className="flex items-center gap-3 text-white">
+    <PawPrint className="h-16 w-16" color="white" />
+    Send
+  </span>
+</Button>
+
+
     </div>
   </form>
 </div>
