@@ -6,6 +6,7 @@ import axios from 'axios'
 import { Menu, Sun, Eye, Plus, ChevronDown, LogOut, Settings, Home, Send, Maximize2, MessageCircle, Users, Bell, Moon, X, Loader2, Trash2, Search, User, Utensils, Apple, Calendar, ChevronRight, PawPrint } from 'lucide-react'
 import { Button } from "../../components/ui/button"
 import { Input } from "../../components/ui/input"
+import Head from 'next/head'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -185,14 +186,14 @@ export default function Dashboard() {
           <div className="text-center space-y-6">
             <h1 className="text-4xl font-bold text-black">Welcome to PETOWK</h1>
             <p className="text-xl text-black">Your AI-powered pet care assistant</p>
-            <div className="bg-white p-6 rounded-lg shadow-md">
+            <div className="bg-white p-6 rounded-xl shadow-md">
               <h2 className="text-2xl font-semibold text-red-600 mb-4">You are not logged in</h2>
               <p className="text-black mb-6">Please log in or sign up to access PETOWK's features and start caring for your pets with AI assistance.</p>
               <div className="flex justify-center space-x-4">
-                <Button asChild className="bg-blue-500 hover:bg-blue-600 text-black py-2 px-6 rounded-lg shadow-md transition duration-200">
+                <Button asChild className="bg-blue-500 hover:bg-blue-600 text-black py-2 px-6 rounded-xl shadow-md transition duration-200">
                   <Link href="../">Log In</Link>
                 </Button>
-                <Button asChild variant="outline" className="bg-white hover:bg-gray-100 text-black py-2 px-6 rounded-lg shadow-md transition duration-200">
+                <Button asChild variant="outline" className="bg-white hover:bg-gray-100 text-black py-2 px-6 rounded-xl shadow-md transition duration-200">
                   <Link href="../signup">Sign Up</Link>
                 </Button>
               </div>
@@ -205,19 +206,27 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="flex h-screen bg-gray-100 text-black">
+    <div className="flex h-screen bg-gray-100 text-gray-800">
+      <Head>
+        <title>
+          PETOWK - AI-powered pet care assistant
+        </title>
+      </Head>
       <Helmet>
         <style>{`
-          body {
-            font-family: 'Times New Roman', serif;
-          }
-          * {
-            color: black;
-          }
-          a:hover {
-            color: #4F46E5; /* indigo-600 */
-          }
-        `}</style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+  body {
+    font-family: 'Inter', sans-serif;
+  }
+  * {
+    color: black;
+  }
+  a:hover {
+    color: #4F46E5; /* indigo-600 */
+  }`}
+        </style>
+
       </Helmet>
       <aside className="hidden md:flex w-16 bg-gray-50 shadow-md flex-col items-center py-6 space-y-6  border border-r-4 border-gray-300">
         <Button variant="ghost" size="icon" className="text-black hover:bg-indigo-100 hover:text-black transition-colors duration-200">
@@ -244,16 +253,18 @@ export default function Dashboard() {
 
 
       <aside
-        className={`hidden md:flex border-r border-indigo-200 transition-all duration-300 ease-in-out ${isDetailSidebarOpen ? 'w-64' : 'w-0'
-          } flex-col overflow-hidden bg-indigo-50`}
+        className={`hidden md:flex border-r border-gray-200 transition-all duration-300 ease-in-out ${isDetailSidebarOpen ? 'w-64' : 'w-0'
+          } flex-col overflow-hidden bg-[#e7dfef] shadow-md`}
       >
         <ScrollArea className="flex-grow">
-          <div className="p-4 space-y-8">
+          <div className="p-2 space-y-2">
             <div className="flex items-center gap-3 bg-white p-4 rounded-xl shadow-sm">
-              <Avatar>
-                <AvatarImage src="/placeholder.svg" />
-                <AvatarFallback>H</AvatarFallback>
-              </Avatar>
+              <div className="flex items-center space-x-2">
+                <div className="flex items-center justify-center h-10 w-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-white font-bold shadow-md">
+                  {session?.user?.name?.slice(0, 2).toUpperCase() || "US"}
+                </div>
+              </div>
+
               <div>
                 <div className="text-sm text-black">Welcome,</div>
                 <div className="font-medium text-black">{session?.user?.name || "User"}</div>
@@ -268,9 +279,9 @@ export default function Dashboard() {
                     <div
                       key={pet._id}
                       className={`flex items-center justify-between p-3 rounded-xl border ${selectedPet && selectedPet.petName === pet.petName
-                          ? 'bg-indigo-100 border-indigo-300 shadow-md'
-                          : 'bg-indigo-50 border-indigo-200 shadow-sm'
-                        } transition-all duration-200 ease-in-out hover:shadow-md`}
+                        ? 'bg-gray-100 border-gray-300 shadow-sm'
+                        : 'bg-white border-gray-200'
+                        } transition-all duration-200 ease-in-out hover:shadow-sm`}
                     >
                       <div
                         className="cursor-pointer flex-grow"
@@ -330,7 +341,7 @@ export default function Dashboard() {
             </div>
 
             <div className="space-y-4 bg-white p-4 rounded-xl shadow-sm">
-              <h4 className="text-lg font-semibold text-black">Add a New Pet</h4>
+              <h4 className="text-lg font-semibold text-gray-800">Add a New Pet</h4>
 
               <form onSubmit={(e) => {
                 e.preventDefault();
@@ -340,7 +351,7 @@ export default function Dashboard() {
                   placeholder="Pet Name"
                   value={petName}
                   onChange={(e) => setPetName(e.target.value)}
-                  className="bg-indigo-100 border-indigo-300 text-black placeholder-indigo-400 rounded-xl shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  className="bg-gray-50 border-gray-300 text-gray-800 placeholder-gray-400 rounded-xl shadow-sm focus:ring-2 focus:ring-gray-400 focus:border-transparent"
                   required
                 />
                 <Input
@@ -348,36 +359,36 @@ export default function Dashboard() {
                   type="number"
                   value={petAge}
                   onChange={(e) => setPetAge(e.target.value)}
-                  className="bg-indigo-100 rounded-xl border-indigo-300 text-black placeholder-indigo-400  shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  className="bg-gray-50 border-gray-300 text-gray-800 placeholder-gray-400 rounded-xl shadow-sm focus:ring-2 focus:ring-gray-400 focus:border-transparent"
                   required
                 />
                 <Button
                   type="submit"
                   variant="outline"
-                  className="w-full justify-start gap-2 border-indigo-300 text-black hover:text-black hover:bg-indigo-200 rounded-xl shadow-sm"
+                  className="w-full justify-start gap-2 border-gray-300 text-gray-800 hover:bg-gray-100 rounded-xl shadow-sm"
                 >
                   <Plus className="h-4 w-4" />
                   Add Pet
                 </Button>
               </form>
 
-              {message && <p className="text-black text-sm mt-2">{message}</p>}
+              {message && <p className="text-gray-600 text-sm mt-2">{message}</p>}
             </div>
             <div className="space-y-4 bg-white p-4 rounded-xl shadow-sm">
-              <h4 className="text-lg font-semibold text-black">Select AI Model</h4>
+              <h4 className="text-lg font-semibold text-gray-800">Select AI Model</h4>
               <Select>
-                <SelectTrigger className="w-full bg-indigo-100 border-indigo-300 text-black rounded-xl">
-                  <SelectValue placeholder="Select an AI model" />
+                <SelectTrigger className="w-full bg-gray-200 border-gray-300 text-gray-800 rounded-xl">
+                  <SelectValue placeholder="NCX AI N1" />
                 </SelectTrigger>
-                <SelectContent className="bg-white rounded-xl border-indigo-200">
+                <SelectContent className="bg-white rounded-xl border-gray-200">
                   <SelectGroup>
                     <SelectLabel>AI Models</SelectLabel>
-                    <SelectItem className="rounded-xl hover:bg-indigo-100" value="gpt-4">GPT-4</SelectItem>
-                    <SelectItem className="rounded-xl hover:bg-indigo-100" value="gpt-3.5">GPT-3.5</SelectItem>
-                    <SelectItem className="rounded-xl hover:bg-indigo-100" value="dalle-2">DALL-E 2</SelectItem>
-                    <SelectItem className="rounded-xl hover:bg-indigo-100" value="stable-diffusion">Stable Diffusion</SelectItem>
-                    <SelectItem className="rounded-xl hover:bg-indigo-100" value="clip">CLIP</SelectItem>
-                    <SelectItem className="rounded-xl hover:bg-indigo-100" value="lama">LLaMA</SelectItem>
+                    <SelectItem className="rounded-xl text-gray-400 hover:bg-gray-100" value="gpt-4" disabled>
+                      NCX AI N1
+                    </SelectItem>
+                    <SelectItem className="rounded-xl text-gray-400 hover:bg-gray-100" value="gpt-3.5" disabled>
+                      NCX AI Pro
+                    </SelectItem>
                   </SelectGroup>
                 </SelectContent>
               </Select>
@@ -390,240 +401,244 @@ export default function Dashboard() {
       </aside>
 
       <Sheet>
-  <SheetTrigger asChild>
-    <Button variant="ghost" size="icon" className="md:hidden fixed top-4 left-4 z-50 bg-white shadow-md rounded-full">
-      <Menu className="h-6 w-6" />
-    </Button>
-  </SheetTrigger>
-  <SheetContent side="left" className="w-[300px] sm:w-[400px] p-4 bg-indigo-100 overflow-y-auto max-h-screen ">
-    <div className="flex flex-col h-full ">
-      <div className="border-b border-gray-200 flex justify-between items-center pt-8 pb-8">
-        <Tabs defaultValue="pets" className="flex-1">
-          <TabsList className="w-full justify-start bg-white rounded-2xl p-1 h-12 space-x-1">
-            <TabsTrigger value="pets" className="flex-1 data-[state=active]:bg-indigo-200 rounded-xl">Pets</TabsTrigger>
-            <TabsTrigger value="services" className="flex-1 data-[state=active]:bg-indigo-200 rounded-xl">Services</TabsTrigger>
-            <TabsTrigger value="account" className="flex-1 data-[state=active]:bg-indigo-200 rounded-xl">Account</TabsTrigger>
-          </TabsList>
+        <SheetTrigger asChild>
+          <Button variant="ghost" size="icon" className="md:hidden fixed top-4 left-4 z-50 bg-white shadow-md rounded-full">
+            <Menu className="h-6 w-6" />
+          </Button>
+        </SheetTrigger>
+        <SheetContent side="left" className="w-[300px] sm:w-[400px] p-4 bg-white overflow-y-auto max-h-screen ">
+          <div className="flex flex-col h-full ">
+            <div className="border-b border-gray-200 flex justify-between items-center pt-8 pb-8">
+              <Tabs defaultValue="pets" className="flex-1">
+                <TabsList className="w-full justify-start bg-white rounded-2xl p-1 h-12 space-x-1">
+                  <TabsTrigger value="pets" className="flex-1 data-[state=active]:bg-indigo-200 rounded-xl">Pets</TabsTrigger>
+                  <TabsTrigger value="services" className="flex-1 data-[state=active]:bg-indigo-200 rounded-xl">Services</TabsTrigger>
+                  <TabsTrigger value="account" className="flex-1 data-[state=active]:bg-indigo-200 rounded-xl">Account</TabsTrigger>
+                </TabsList>
 
-          {/* Scroll Area for Tabs Content */}
-          <ScrollArea className="flex-1 mt-4 overflow-y-auto max-h-full">
-            <TabsContent value="pets" className="space-y-6">
-              <div className="bg-white p-4 rounded-xl shadow-sm">
-                <div className="flex items-center gap-3 mb-4">
-                  <Avatar>
-                    <AvatarImage src="/placeholder.svg" />
-                    <AvatarFallback>{session?.user?.name?.[0] || "U"}</AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <div className="text-sm text-black">Welcome,</div>
-                    <div className="font-medium text-black">{session?.user?.name || "User"}</div>
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold text-black">Your Pets</h3>
-                  {pets.length > 0 ? (
-                    <div className="space-y-3">
-                      {pets.map((pet) => (
-                        <div
-                          key={pet._id}
-                          className={`flex items-center justify-between p-3 rounded-xl border ${selectedPet && selectedPet.petName === pet.petName
-                              ? 'bg-indigo-200 border-indigo-300 shadow-md'
-                              : 'bg-indigo-50 border-indigo-200 shadow-sm'
-                            } transition-all duration-200 ease-in-out hover:shadow-md`}
-                        >
-                          <div
-                            className="cursor-pointer flex-grow"
-                            onClick={() => handlePetClick(pet.petName, pet.petAge)}
-                          >
-                            <div
-                              className={`font-medium ${selectedPet && selectedPet.petName === pet.petName ? 'text-black' : 'text-black'
-                                }`}
-                            >
-                              {pet.petName}
-                            </div>
-                            <div className="text-sm text-black">{`Age: ${pet.petAge} months`}</div>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="text-black hover:text-black hover:bg-indigo-100"
-                            >
-                              <Settings className="h-4 w-4" />
-                            </Button>
-                            <AlertDialog>
-                              <AlertDialogTrigger asChild>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="text-black hover:text-black hover:bg-indigo-100"
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              </AlertDialogTrigger>
-                              <AlertDialogContent className="bg-white">
-                                <AlertDialogHeader>
-                                  <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                                  <AlertDialogDescription className="text-black">
-                                    This action cannot be undone. This will permanently delete your pet's data.
-                                  </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                  <AlertDialogCancel className="bg-indigo-100 text-black hover:bg-indigo-200">Cancel</AlertDialogCancel>
-                                  <AlertDialogAction
-                                    className="bg-red-600 text-black hover:bg-red-700"
-                                    onClick={() => deletePet(pet._id)}
-                                  >
-                                    Delete
-                                  </AlertDialogAction>
-                                </AlertDialogFooter>
-                              </AlertDialogContent>
-                            </AlertDialog>
-                          </div>
+                {/* Scroll Area for Tabs Content */}
+                <ScrollArea className="flex-1 mt-4 overflow-y-auto max-h-full">
+                  <TabsContent value="pets" className="space-y-6">
+                    <div className="bg-[white] p-4 rounded-xl shadow-sm">
+                      <div className="flex items-center gap-3 mb-4">
+                        <Avatar>
+                          <AvatarFallback>{session?.user?.name?.[0] || "U"}</AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <div className="text-sm text-black">Welcome,</div>
+                          <div className="font-medium text-black">{session?.user?.name || "User"}</div>
                         </div>
-                      ))}
+                      </div>
+
+                      <div className="space-y-4">
+                        <h3 className="text-lg font-semibold text-black">Your Pets</h3>
+                        {pets.length > 0 ? (
+                          <div className="space-y-3">
+                            {pets.map((pet) => (
+                              <div
+                                key={pet._id}
+                                className={`flex items-center justify-between p-3 rounded-xl border ${selectedPet && selectedPet.petName === pet.petName
+                                  ? 'bg-gray-100 border-gray-300 shadow-sm'
+                                  : 'bg-white border-gray-200'
+                                  } transition-all duration-200 ease-in-out hover:shadow-sm`}
+                              >
+                                <div
+                                  className="cursor-pointer flex-grow"
+                                  onClick={() => handlePetClick(pet.petName, pet.petAge)}
+                                >
+                                  <div
+                                    className={`font-medium ${selectedPet && selectedPet.petName === pet.petName ? 'text-black' : 'text-black'
+                                      }`}
+                                  >
+                                    {pet.petName}
+                                  </div>
+                                  <div className="text-sm text-black">{`Age: ${pet.petAge} months`}</div>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="text-black hover:text-black hover:bg-indigo-100"
+                                  >
+                                    <Settings className="h-4 w-4" />
+                                  </Button>
+                                  <AlertDialog>
+                                    <AlertDialogTrigger asChild>
+                                      <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="text-black hover:text-black hover:bg-indigo-100"
+                                      >
+                                        <Trash2 className="h-4 w-4" />
+                                      </Button>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent className="bg-white">
+                                      <AlertDialogHeader>
+                                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                        <AlertDialogDescription className="text-black">
+                                          This action cannot be undone. This will permanently delete your pet's data.
+                                        </AlertDialogDescription>
+                                      </AlertDialogHeader>
+                                      <AlertDialogFooter>
+                                        <AlertDialogCancel className="bg-indigo-100 text-black hover:bg-indigo-200">Cancel</AlertDialogCancel>
+                                        <AlertDialogAction
+                                          className="bg-red-600 text-black hover:bg-red-700"
+                                          onClick={() => deletePet(pet._id)}
+                                        >
+                                          Delete
+                                        </AlertDialogAction>
+                                      </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                  </AlertDialog>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <p className="text-black text-sm">No pets added yet.</p>
+                        )}
+                      </div>
                     </div>
-                  ) : (
-                    <p className="text-black text-sm">No pets added yet.</p>
-                  )}
-                </div>
-              </div>
 
-              <div className="space-y-4 bg-white p-4 rounded-xl shadow-sm">
-                <h4 className="text-lg font-semibold text-black">Add a New Pet</h4>
-                <form onSubmit={(e) => {
-                  e.preventDefault();
-                  savePetInfo(petName, petAge);
-                }} className="space-y-4">
-                  <Input
-                    placeholder="Pet Name"
-                    value={petName}
-                    onChange={(e) => setPetName(e.target.value)}
-                    className="bg-indigo-100 border-indigo-300 text-black placeholder-indigo-400 rounded-xl shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                    required
-                  />
-                  <Input
-                    placeholder="Pet Age (in months)"
-                    type="number"
-                    value={petAge}
-                    onChange={(e) => setPetAge(e.target.value)}
-                    className="bg-indigo-100 rounded-xl border-indigo-300 text-black placeholder-indigo-400 shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                    required
-                  />
-                  <Button
-                    type="submit"
-                    variant="outline"
-                    className="w-full justify-start gap-2 border-indigo-300 text-black hover:text-black hover:bg-indigo-200 rounded-xl shadow-sm"
-                  >
-                    <Plus className="h-4 w-4" />
-                    Add Pet
-                  </Button>
-                </form>
-                {message && <p className="text-black text-sm mt-2">{message}</p>}
-              </div>
+                    <div className="space-y-4 bg-white p-4 rounded-xl shadow-sm">
+                      <h4 className="text-lg font-semibold text-gray-800">Add a New Pet</h4>
+                      <form onSubmit={(e) => {
+                        e.preventDefault();
+                        savePetInfo(petName, petAge);
+                      }} className="space-y-4">
+                        <Input
+                          placeholder="Pet Name"
+                          value={petName}
+                          onChange={(e) => setPetName(e.target.value)}
+                          className="bg-gray-50 border-gray-300 text-gray-800 placeholder-gray-400 rounded-xl shadow-sm focus:ring-2 focus:ring-gray-400 focus:border-transparent"
+                          required
+                        />
+                        <Input
+                          placeholder="Pet Age (in months)"
+                          type="number"
+                          value={petAge}
+                          onChange={(e) => setPetAge(e.target.value)}
+                          className="bg-gray-50 border-gray-300 text-gray-800 placeholder-gray-400 rounded-xl shadow-sm focus:ring-2 focus:ring-gray-400 focus:border-transparent"
+                          required
+                        />
+                        <Button
+                          type="submit"
+                          variant="outline"
+                          className="w-full justify-start gap-2 border-gray-300 text-gray-800 hover:bg-gray-100 rounded-xl shadow-sm"
+                        >
+                          <Plus className="h-4 w-4" />
+                          Add Pet
+                        </Button>
+                      </form>
+                      {message && <p className="text-gray-600 text-sm mt-2">{message}</p>}
+                    </div>
+                    <div className="space-y-4 bg-white p-4 rounded-xl shadow-sm">
+                      <h4 className="text-lg font-semibold text-gray-800">Select AI Model</h4>
+                      <Select>
+                        <SelectTrigger className="w-full bg-gray-50 border-gray-300 text-gray-800 rounded-xl">
+                          <SelectValue placeholder="NCX AI N1" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-white rounded-xl border-gray-200">
+                          <SelectGroup>
+                            <SelectLabel>AI Models</SelectLabel>
+                            <SelectItem className="rounded-xl text-gray-400 hover:bg-gray-100" value="gpt-4" disabled>
+                              NCX AI N1
+                            </SelectItem>
+                            <SelectItem className="rounded-xl text-gray-400 hover:bg-gray-100" value="gpt-3.5" disabled>
+                              NCX AI Pro
+                            </SelectItem>
+                          </SelectGroup>
+                        </SelectContent>
+                      </Select>
+                    </div>
 
-              <div className="space-y-4 bg-white p-4 rounded-xl shadow-sm">
-                <h4 className="text-lg font-semibold text-black">Select AI Model</h4>
-                <Select>
-                  <SelectTrigger className="w-full bg-indigo-100 border-indigo-300 text-black rounded-xl">
-                    <SelectValue placeholder="Select an AI model" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-white rounded-xl border-indigo-200">
-                    <SelectGroup>
-                      <SelectLabel>AI Models</SelectLabel>
-                      <SelectItem className="rounded-xl hover:bg-indigo-100" value="gpt-4">GPT-4</SelectItem>
-                      <SelectItem className="rounded-xl hover:bg-indigo-100" value="gpt-3.5">GPT-3.5</SelectItem>
-                      <SelectItem className="rounded-xl hover:bg-indigo-100" value="dalle-2">DALL-E 2</SelectItem>
-                      <SelectItem className="rounded-xl hover:bg-indigo-100" value="stable-diffusion">Stable Diffusion</SelectItem>
-                      <SelectItem className="rounded-xl hover:bg-indigo-100" value="clip">CLIP</SelectItem>
-                      <SelectItem className="rounded-xl hover:bg-indigo-100" value="lama">LLaMA</SelectItem>
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-              </div>
 
-            </TabsContent>
+                  </TabsContent>
 
-            {/* Services Tab Content */}
-            <TabsContent value="services" className="space-y-4">
-              <div className="bg-white p-4 rounded-2xl shadow-sm">
-                <h3 className="text-lg font-semibold text-black mb-4">Our Services</h3>
-                <nav className="space-y-2">
-                  <Button variant="ghost" className="w-full justify-start text-black hover:bg-violet-100">
-                    <MessageCircle className="mr-2 h-4 w-4" />
-                    Chat with AI Vet
-                  </Button>
-                  <Button variant="ghost" className="w-full justify-start text-black hover:bg-violet-100">
-                    <Utensils className="mr-2 h-4 w-4" />
-                    Food suggestion
-                  </Button>
-                  <Button variant="ghost" className="w-full justify-start text-black hover:bg-violet-100">
-                    <Apple className="mr-2 h-4 w-4" />
-                    Nutrition checker
-                  </Button>
-                  <Button variant="ghost" className="w-full justify-start text-black hover:bg-violet-100">
-                    <Calendar className="mr-2 h-4 w-4" />
-                    Vet booking
-                  </Button>
-                </nav>
-              </div>
-            </TabsContent>
+                  {/* Services Tab Content */}
+                  <TabsContent value="services" className="space-y-4">
+                    <div className="bg-white p-4 rounded-2xl shadow-sm">
+                      <h3 className="text-lg font-semibold text-black mb-4">Our Services</h3>
+                      <nav className="space-y-2">
+                        <Button variant="ghost" className="w-full justify-start text-black hover:bg-violet-100">
+                          <MessageCircle className="mr-2 h-4 w-4" />
+                          Chat with AI Vet
+                        </Button>
+                        <Button variant="ghost" className="w-full justify-start text-black hover:bg-violet-100">
+                          <Utensils className="mr-2 h-4 w-4" />
+                          Food suggestion
+                        </Button>
+                        <Button variant="ghost" className="w-full justify-start text-black hover:bg-violet-100">
+                          <Apple className="mr-2 h-4 w-4" />
+                          Nutrition checker
+                        </Button>
+                        <Button variant="ghost" className="w-full justify-start text-black hover:bg-violet-100">
+                          <Calendar className="mr-2 h-4 w-4" />
+                          Vet booking
+                        </Button>
+                      </nav>
+                    </div>
+                  </TabsContent>
 
-            {/* Account Tab Content */}
-            <TabsContent value="account" className="space-y-4">
-              <div className="bg-white p-4 rounded-2xl shadow-sm">
-                <h3 className="text-lg font-semibold text-black mb-4">Account Settings</h3>
-                <div className="space-y-2">
-                  <Button variant="ghost" className="w-full justify-start text-black hover:bg-violet-100">
-                    <User className="mr-2 h-4 w-4" />
-                    Profile
-                  </Button>
-                  <Button variant="ghost" className="w-full justify-start text-black hover:bg-violet-100">
-                    <Settings className="mr-2 h-4 w-4" />
-                    Settings
-                  </Button>
-                  <Button variant="ghost" className="w-full justify-start text-black hover:bg-violet-100">
-                    <LogOut className="mr-2 h-4 w-4" />
-                    Log out
-                  </Button>
-                </div>
-              </div>
-            </TabsContent>
-          </ScrollArea>
-        </Tabs>
-      </div>
-    </div>
-  </SheetContent>
-</Sheet>
+                  {/* Account Tab Content */}
+                  <TabsContent value="account" className="space-y-4">
+                    <div className="bg-white p-4 rounded-2xl shadow-sm">
+                      <h3 className="text-lg font-semibold text-black mb-4">Account Settings</h3>
+                      <div className="space-y-2">
+                        <Button variant="ghost" className="w-full justify-start text-black hover:bg-violet-100">
+                          <User className="mr-2 h-4 w-4" />
+                          Profile
+                        </Button>
+                        <Button variant="ghost" className="w-full justify-start text-black hover:bg-violet-100">
+                          <Settings className="mr-2 h-4 w-4" />
+                          Settings
+                        </Button>
+                        <Button variant="ghost" className="w-full justify-start text-black hover:bg-violet-100">
+                          <LogOut className="mr-2 h-4 w-4" />
+                          Log out
+                        </Button>
+                      </div>
+                    </div>
+                  </TabsContent>
+                </ScrollArea>
+              </Tabs>
+            </div>
+          </div>
+        </SheetContent>
+      </Sheet>
 
 
       <main className="flex-1 flex flex-col bg-gray-50 overflow-hidden">
-        <header className="bg-white border-b border-indigo-200 sticky top-0 z-10 shadow-sm ">
+        <header className="bg-white border-b border-gray-200 sticky top-0 z-10 shadow-sm">
           <div className="container mx-auto px-4">
             <div className="flex items-center justify-between h-16">
               <div className="flex items-center">
                 <Link href="/" className="flex items-center px-12">
-                  <PawPrint className="h-8 w-8 text-black mr-2" />
-                  <h1 className="text-xl font-bold text-black">PETOWK</h1>
+                  <img
+                    src="./logo.png"
+                    alt="PETOWK"
+                    className="h-16 w-32 object-contain"
+                    style={{ opacity: 0.8 }} // Adjust transparency
+                  />
                 </Link>
               </div>
+
               <div className="flex items-center space-x-4">
                 <CreatePetModal onSave={savePetInfo} trigger={
                   <Button
-  variant="outline"
-  size="sm"
-  className="hidden md:flex bg-indigo-500 text-white border-indigo-600 hover:bg-indigo-600 hover:text-gray-100 rounded-xl shadow-sm hover:shadow-md transform hover:scale-105 transition duration-300 ease-in-out"
->
-  <Plus className="mr-2 h-4 w-4 text-white transition-transform duration-300 ease-in-out transform hover:scale-125" color='white'/>
-  Add Pet
-</Button>
+                    variant="outline"
+                    size="sm"
+                    className="hidden md:flex bg-white text-gray-800 border-gray-300 hover:bg-gray-100 hover:text-gray-900 rounded-xl shadow-sm hover:shadow-md transition duration-300 ease-in-out"
+                  >
+                    <Plus className="mr-2 h-4 w-4 text-gray-600" />
+                    Add Pet
+                  </Button>
 
 
 
 
                 } />
-                <Button variant="ghost" size="icon" className="text-black hover:bg-indigo-100 hover:text-black rounded-xl">
+                <Button variant="ghost" size="icon" className="text-gray-600 hover:bg-gray-100 hover:text-gray-800 rounded-xl">
                   <Bell className="h-5 w-5" />
                 </Button>
                 <DropdownMenu>
@@ -636,15 +651,15 @@ export default function Dashboard() {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-56 bg-white shadow-lg rounded-xl border border-gray-200">
-                    <DropdownMenuItem className="hover:bg-indigo-50 rounded-xl">
+                    <DropdownMenuItem className="hover:bg-gray-100 rounded-xl">
                       <User className="mr-2 h-4 w-4" />
                       <span>Profile</span>
                     </DropdownMenuItem>
-                    <DropdownMenuItem className="hover:bg-indigo-50 rounded-xl">
+                    <DropdownMenuItem className="hover:bg-gray-100 rounded-xl">
                       <Settings className="mr-2 h-4 w-4" />
                       <span>Settings</span>
                     </DropdownMenuItem>
-                    <DropdownMenuItem className="hover:bg-indigo-50 rounded-xl">
+                    <DropdownMenuItem className="hover:bg-gray-100 rounded-xl">
                       <LogOut className="mr-2 h-4 w-4" />
                       <span>Log out</span>
                     </DropdownMenuItem>
@@ -656,9 +671,9 @@ export default function Dashboard() {
         </header>
 
 
-        <div className="flex-1 overflow-hidden flex flex-col" style={{backgroundColor: '#e4e8f0'}}>
+        <div className="flex-1 overflow-hidden flex flex-col bg-gray-50">
           <ScrollArea className="flex-1">
-            <div className="container mx-auto px-4 py-8">
+            <div className="container mx-auto px-4 py-8 bg-white">
               <div className=" mx-auto space-y-8">
                 {selectedPet ? (
                   <>
@@ -668,53 +683,61 @@ export default function Dashboard() {
                         Ask questions about {selectedPet.petName}'s health, nutrition, or care.
                       </p>
                     </div>
-                    <div className="space-y-6">
+                    <div className="space-y-4">
                       {chatMessages.map((message, index) => (
                         <div
                           key={index}
-                          className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'
+                          className={`flex items-start ${message.role === 'user' ? 'justify-end' : 'justify-start'
                             }`}
                         >
+                          {message.role === 'assistant' && (
+                            <div className="flex items-center space-x-2">
+                              <div className="flex items-center justify-center h-10 w-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-white font-bold shadow-md">
+                                AI
+                              </div>
+                            </div>
+
+                          )}
                           <div
-                            className={`max-w-[80%] p-4 rounded-xl shadow-lg ${message.role === 'user'
-                                ? 'bg-indigo-500 text-black self-end rounded-br-none' // User message with rounded bottom right corner
-                                : 'bg-white text-black border border-gray-300 self-start rounded-bl-none' // Bot message with rounded bottom left corner
+                            className={`max-w-[80%] p-3 rounded-xl ${message.role === 'user'
+                                ? 'bg-gray-100 mr-6 shadow-sm rounded-xl text-gray-800'
+                                : 'mx-4 rounded-xl bg-white shadow-sm text-gray-800'
                               }`}
                           >
                             {message.role === 'user' ? (
                               <p>{message.content}</p>
                             ) : (
                               <div
-                                className="prose prose-sm max-w-none"
+                                className="prose prose-sm max-w-none dark:prose-invert"
                                 dangerouslySetInnerHTML={{ __html: sanitizeHtml(message.content) }}
                               />
                             )}
                           </div>
+                          {message.role === 'user' && (
+                            <div className="flex items-center space-x-2">
+                              <div className="flex items-center justify-center h-10 w-10 rounded-full bg-gradient-to-br from-gray-500 to-gray-600 text-whitefont-bold shadow-md">       U
+                              </div>
+                            </div>
+                          )}
                         </div>
                       ))}
-                      {isLoading && (
-                        <div className="flex justify-center items-center space-x-2">
-                          <Loader2 className="h-6 w-6 animate-spin text-indigo-500" />
-                          <span className="text-black">Processing your request...</span>
-                        </div>
-                      )}
                     </div>
                   </>
                 ) : (
                   <div className="text-center py-20">
-                    <h2 className="text-3xl font-bold mb-4 text-black">Welcome to PETOWK</h2>
-                    <p className="text-black text-lg mb-8">
+                    <h2 className="text-3xl font-bold mb-4 text-gray-800">Welcome to PETOWK</h2>
+                    <p className="text-gray-600 text-lg mb-8">
                       {pets.length > 0
                         ? "Select a pet from the sidebar to start chatting with our AI Vet."
                         : "You haven't added any pets yet. Create your first pet to get started!"}
                     </p>
                     {pets.length > 0 ? (
-                      <Button onClick={() => setIsDetailSidebarOpen(true)} className="bg-indigo-500 hover:bg-indigo-600 text-black shadow-md text-lg py-2 px-6">
+                      <Button onClick={() => setIsDetailSidebarOpen(true)} className="bg-gray-800 hover:bg-gray-700 text-white shadow-md text-lg py-2 px-6 rounded-xl transition duration-300 ease-in-out">
                         Select a Pet
                       </Button>
                     ) : (
                       <CreatePetModal onSave={savePetInfo} trigger={
-                        <Button className="bg-indigo-500 hover:bg-indigo-600 text-white shadow-md text-lg py-2 px-6">
+                        <Button className="bg-gray-800 hover:bg-gray-700 text-white shadow-md text-lg py-2 px-6 rounded-xl transition duration-300 ease-in-out">
                           Add Your First Pet
                         </Button>
                       } />
@@ -723,53 +746,56 @@ export default function Dashboard() {
                 )}
               </div>
             </div>
-          </ScrollArea>
+          </ScrollArea>{isLoading && (
+            <div className="flex justify-center items-center space-x-2 mt-4 py-6">
+              <Loader2 className="h-5 w-5 animate-spin text-gray-600" />
+              <span className="text-xl text-gray-600">AI is thinking...</span>
+            </div>
+          )}
 
-          <div className="bg-white border-t border-indigo-200 p-6 sticky bottom-0 shadow-lg z-10">
-  <form
-    onSubmit={handleChatSubmit}
-    className="max-w-4xl mx-auto grid grid-cols-4 gap-4 items-center"
-  >
-    {/* Query Type Select */}
-    <div className="col-span-4 md:col-span-1">
-    <Select value={queryType} onValueChange={setQueryType}>
-        <SelectTrigger className="w-full bg-indigo-100 border-indigo-300 rounded-xl shadow-md text-black hover:bg-indigo-200 px-6 py-4 text-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none transition-colors duration-200">
-          <SelectValue placeholder="Choose a query type" />
-        </SelectTrigger>
-        <SelectContent className="bg-white border border-indigo-200 rounded-xl shadow-lg text-black">
-          <SelectItem className="hover:bg-indigo-100 focus:bg-indigo-200 rounded-xl" value="symptom">Symptom</SelectItem>
-          <SelectItem className="hover:bg-indigo-100 focus:bg-indigo-200 rounded-xl" value="food">Food</SelectItem>
-          <SelectItem className="hover:bg-indigo-100 focus:bg-indigo-200 rounded-xl" value="nutrition">Nutrition</SelectItem>
-        </SelectContent>
-      </Select>
-    </div>
+          <div className="bg-white border-t border-gray-200 p-6 sticky bottom-0 shadow-md z-10">
+            <form
+              onSubmit={handleChatSubmit}
+              className="max-w-4xl mx-auto grid grid-cols-4 gap-4 items-center"
+            >
+              {/* Query Type Select */}
+              <div className="col-span-4 md:col-span-1">
+                <Select value={queryType} onValueChange={setQueryType}>
+                  <SelectTrigger className="w-full bg-gray-50 border-gray-300 rounded-xl shadow-sm text-gray-800 hover:bg-gray-100 px-4 py-2 text-sm focus:ring-2 focus:ring-gray-400 focus:border-gray-400 focus:outline-none transition-colors duration-200">
+                    <SelectValue placeholder="Choose a query type" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white border border-gray-200 rounded-xl shadow-md text-gray-800">
+                    <SelectItem className="hover:bg-gray-100 focus:bg-gray-200 rounded-xl" value="symptom">Symptom</SelectItem>
+                    <SelectItem className="hover:bg-gray-100 focus:bg-gray-200 rounded-xl" value="food">Food</SelectItem>
+                    <SelectItem className="hover:bg-gray-100 focus:bg-gray-200 rounded-xl" value="nutrition">Nutrition</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
 
-    {/* Input Field with Send Button */}
-    <div className="col-span-4 md:col-span-3 relative flex items-center gap-4">
-      <Input
-        placeholder={placeholderText}
-        value={inputValue}
-        onChange={(e) => setInputValue(e.target.value)}
-        className="w-full bg-indigo-100 border-2 border-indigo-300 text-black placeholder-indigo-400 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 rounded-xl py-4 px-6 text-lg shadow-sm"
-        disabled={!selectedPet || isLoading}
-      />
+              {/* Input Field with Send Button */}
+              <div className="col-span-4 md:col-span-3 relative flex items-center gap-4">
+                <Input
+                  placeholder={placeholderText}
+                  value={inputValue}
+                  onChange={(e) => setInputValue(e.target.value)}
+                  className="w-full bg-gray-50 border-2 border-gray-300 text-gray-800 placeholder-gray-400 focus:ring-2 focus:ring-gray-400 focus:border-gray-400 rounded-xl py-2 px-4 text-sm shadow-sm transition duration-300 ease-in-out hover:shadow-md"
+                  disabled={!selectedPet || isLoading}
+                />
 
-      {/* Send Button */}
-      <Button
-  type="submit"
-  className="bg-indigo-600 hover:bg-indigo-800 text-white rounded-xl px-4 py-5 font-semibold text-lg shadow-lg hover:shadow-2xl transform hover:scale-110 transition duration-300 ease-in-out"
-  disabled={!selectedPet || isLoading}
->
-  <span className="flex items-center gap-3 text-white">
-    <PawPrint className="h-16 w-16" color="white" />
-    Send
-  </span>
-</Button>
-
-
-    </div>
-  </form>
-</div>
+                {/* Send Button */}
+                <Button
+                  type="submit"
+                  className="bg-gray-800 hover:bg-gray-700 text-white rounded-xl px-6 py-2 font-semibold text-sm shadow-md hover:shadow-lg transform hover:scale-105 transition duration-300 ease-in-out"
+                  disabled={!selectedPet || isLoading}
+                >
+                  <span className="flex items-center gap-2 text-white">
+                    <PawPrint className="h-4 w-4" color="white" />
+                    Send
+                  </span>
+                </Button>
+              </div>
+            </form>
+          </div>
 
         </div>
       </main>
