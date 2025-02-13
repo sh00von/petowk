@@ -5,6 +5,8 @@ import Head from 'next/head';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import Link from 'next/link';
+
+import Hero from '../components/Hero'
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 
@@ -48,6 +50,7 @@ export default function Home() {
       </Head>
       <Header />
       <main className="flex-grow pt-24">
+        <Hero />
         <section className="max-w-md mx-auto mt-8 p-6 border rounded-lg shadow-lg">
           <h2 className="text-2xl font-bold mb-6 text-center">Sign Up</h2>
           <form onSubmit={handleEmailSignIn} className="space-y-4">
@@ -72,9 +75,6 @@ export default function Home() {
             <Button onClick={handleGoogleLogin} className="w-full bg-blue-600" disabled={isLoading}>
               {isLoading ? 'Logging in...' : 'Login with Google'}
             </Button>
-            <p className="text-sm mt-4">
-              Already registered? <Link href="/auth/signin">Log in here</Link>
-            </p>
           </div>
         </section>
       </main>

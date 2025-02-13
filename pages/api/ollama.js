@@ -24,7 +24,7 @@ export default async function handler(req, res) {
 
   // Construct the prompt with unified HTML styling
   if (symptom) {
-    prompt = `Provide a health analysis for a ${pet} with symptoms: "${symptom}" (max 400 words). Include causes, tips, and precautions in this format:
+    prompt = `Provide a health analysis for a ${pet} with symptoms: "${symptom}" (max 400 words). Include causes, tips, and precautions, and output in strict HTML format with the following structure:
 
 <div class="space-y-4 text-gray-800">
   <h2 class="text-xl font-semibold">Health Analysis for ${pet}</h2>
@@ -52,38 +52,44 @@ export default async function handler(req, res) {
   </div>
 </div>`;
   } else if (food) {
-    prompt = `Suggest 3 foods for a ${pet} based on "${food}" (max 400 words). Include benefits and notes in this format:
+    prompt = `Provide detailed advice about feeding a ${pet} the following food: "${food}". Include whether it's good or bad for the pet, its nutritional value, and any relevant precautions. The output must be in strict HTML format with the following structure:
 
 <div class="space-y-4 text-gray-800">
-  <h2 class="text-xl font-semibold">Food Recommendations for ${pet}</h2>
+  <h2 class="text-xl font-semibold">Food Analysis for ${pet} and "${food}"</h2>
 
-  <ul class="space-y-3">
-    <li class="bg-green-50 p-3 rounded-md">
-      <span class="font-semibold text-green-600">Food Name 1</span>
-      <p>Nutritional benefits: Brief description</p>
-      <p class="text-sm text-gray-600">Best for: Conditions or needs</p>
-    </li>
-    <li class="bg-green-50 p-3 rounded-md">
-      <span class="font-semibold text-green-600">Food Name 2</span>
-      <p>Nutritional benefits: Brief description</p>
-      <p class="text-sm text-gray-600">Best for: Conditions or needs</p>
-    </li>
-  </ul>
+  <div class="bg-green-50 p-4 rounded-md">
+    <p>Provide a detailed answer on whether this food is good or bad for ${pet}, considering nutrition, risks, and benefits. Output in HTML format.</p>
+  </div>
+
+  <div class="bg-yellow-50 p-4 rounded-md">
+    <h3 class="text-lg font-semibold text-yellow-600">Nutritional Information</h3>
+    <p>Discuss the nutritional aspects of "${food}" for ${pet}, including key nutrients and whether it supports the pet’s diet. Output in HTML format.</p>
+  </div>
+
+  <div class="bg-red-50 p-4 rounded-md">
+    <h3 class="text-lg font-semibold text-red-600">Precautions</h3>
+    <p>If there are any risks or concerns about feeding "${food}" to ${pet}, mention them here in HTML format.</p>
+  </div>
 </div>`;
   } else if (nutrition) {
-    prompt = `Provide nutritional advice for a ${pet} on "${nutrition}" (max 400 words). Include nutrients, benefits, and considerations in this format:
+    prompt = `Provide nutritional advice for a ${pet} on ${nutrition} (max 400 words). Include nutrients, benefits, and considerations, and output in strict HTML format with the following structure:
 
 <div class="space-y-4 text-gray-800">
-  <h2 class="text-xl font-semibold">Nutritional Advice for ${pet}</h2>
+  <h2 class="text-xl font-semibold">Nutritional Advice for ${pet} of ${nutrition} </h2>
 
   <div class="bg-purple-50 p-4 rounded-md">
-    <h3 class="text-lg font-semibold text-purple-600">Nutritional Recommendations</h3>
-    <p>Explanation of essential nutrients and their benefits.</p>
+    <h3 class="text-lg font-semibold text-purple-600">Can ${pet}s Eat ${nutrition}?</h3>
+    <p>${food} may or may not be safe for ${pet}s depending on their dietary needs. This section will explain if it is safe, its potential benefits, and any risks.</p>
+  </div>
+
+  <div class="bg-green-50 p-4 rounded-md">
+    <h3 class="text-lg font-semibold text-green-600">Nutritional Benefits</h3>
+    <p>${food} contains various nutrients such as vitamins and minerals that could be beneficial for ${pet}s. However, it should be fed in moderation as part of a balanced diet.</p>
   </div>
 
   <div class="bg-yellow-50 p-4 rounded-md">
     <h3 class="text-lg font-semibold text-yellow-600">Important Considerations</h3>
-    <p class="text-sm">Consider portion sizes and dietary restrictions.</p>
+    <p class="text-sm">Consider portion sizes and possible allergic reactions. Some pets may have difficulty digesting ${nutrition}, and certain parts (like seeds or peels) may not be safe. Always introduce new foods gradually and consult a vet if unsure.</p>
   </div>
 </div>`;
   }

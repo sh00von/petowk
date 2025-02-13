@@ -1,9 +1,9 @@
 'use client'
-
-import { useState, useEffect } from 'react'
+import { signOut } from 'next-auth/react';
+import { useState, useEffect, useRef } from 'react'
 import { useSession } from "next-auth/react"
 import axios from 'axios'
-import { Menu, Sun, Eye, Plus, ChevronDown, LogOut, Settings, Home, Send, Maximize2, MessageCircle, Users, Bell, Moon, X, Loader2, Trash2, Search, User, Utensils, Apple, Calendar, ChevronRight, PawPrint } from 'lucide-react'
+import { Menu, Sun, Eye, Plus,ArrowUp, ChevronDown, LogOut, Settings, Home, Send, Maximize2, MessageCircle, Users, Bell, Moon, X, Loader2, Trash2, Search, User, Utensils, Apple, Calendar, ChevronRight, PawPrint } from 'lucide-react'
 import { Button } from "../../components/ui/button"
 import { Input } from "../../components/ui/input"
 import Head from 'next/head'
@@ -77,6 +77,7 @@ export default function Dashboard() {
   const [message, setMessage] = useState("")
   const [selectedPet, setSelectedPet] = useState(null)
 
+  const chatContainerRef = useRef(null);
   useEffect(() => {
     if (status === 'authenticated') {
       fetchPetInfo();
@@ -178,7 +179,7 @@ export default function Dashboard() {
       setInputValue('')
     }
   }
-
+ 
   if (status === "loading") {
     return (
       <div className="flex items-center justify-center h-screen bg-gray-100">
@@ -254,6 +255,7 @@ export default function Dashboard() {
           <Menu className="h-6 w-6" />
         </Button>
         <Button
+        onClick={() => signOut({ callbackUrl: '/' })}
           variant="ghost"
           size="icon"
           className="text-gray-600 hover:bg-indigo-100 hover:text-indigo-600 transition-colors duration-200"
@@ -292,7 +294,7 @@ export default function Dashboard() {
                     <div
                       key={pet._id}
                       className={`flex items-center justify-between p-3 rounded-xl border ${selectedPet && selectedPet.petName === pet.petName
-                        ? 'bg-gray-100 border-gray-300 shadow-sm'
+                        ? 'bg-[#E6DEEE] border-gray-300 shadow-sm'
                         : 'bg-white border-gray-200'
                         } transition-all duration-200 ease-in-out hover:shadow-sm`}
                     >
@@ -606,7 +608,7 @@ export default function Dashboard() {
                           <Settings className="mr-2 h-4 w-4" />
                           Settings
                         </Button>
-                        <Button variant="ghost" className="w-full justify-start text-black hover:bg-violet-100">
+                        <Button variant="ghost" onClick={() => signOut({ callbackUrl: '/' })} className="w-full justify-start text-black hover:bg-violet-100">
                           <LogOut className="mr-2 h-4 w-4" />
                           Log out
                         </Button>
@@ -672,7 +674,7 @@ export default function Dashboard() {
                       <Settings className="mr-2 h-4 w-4" />
                       <span>Settings</span>
                     </DropdownMenuItem>
-                    <DropdownMenuItem className="hover:bg-gray-100 rounded-xl">
+                    <DropdownMenuItem className="hover:bg-gray-100 rounded-xl" onClick={() => signOut({ callbackUrl: '/' })}>
                       <LogOut className="mr-2 h-4 w-4" />
                       <span>Log out</span>
                     </DropdownMenuItem>
@@ -687,18 +689,18 @@ export default function Dashboard() {
         <div className="flex-1 overflow-hidden flex flex-col bg-gray-50">
           <ScrollArea className="flex-1">
             <div className="container mx-auto px-4 py-8 bg-white">
-              <div className="max-w-3xl mx-auto space-y-8">
+              <div className="">
                 {selectedPet ? (
                   <>
-                    <div className="text-center">
-                      <h2 className="text-3xl font-bold mb-2 text-black">
-                        Chat with PETOWK AI about {selectedPet.petName}
-                      </h2>
-                      <p className="text-black text-lg">
-                        Ask questions about {selectedPet.petName}'s health, nutrition, or care.
-                      </p>
-                    </div>
-                    <div className="space-y-4">
+                    <div className="text-center sticky top-0 bg-white z-10 p-4 ">
+  <h2 className="text-3xl font-bold mb-2 text-black">
+    Chat with PETOWK AI about {selectedPet.petName}
+  </h2>
+  <p className="text-black text-lg">
+    Ask questions about {selectedPet.petName}'s health, nutrition, or care.
+  </p>
+</div>               
+                    <div className="space-y-4 max-w-4xl mx-auto mt-8">
                       {chatMessages.map((message, index) => (
                         <div
                           key={index}
@@ -719,7 +721,8 @@ export default function Dashboard() {
                             }`}
                           >
                             {message.role === "user" ? (
-                              <p>{message.content}</p>
+                              <p id={`${index + 1}`}>{message.content}</p>
+
                             ) : (
                               <div
                                 className="prose prose-sm max-w-none dark:prose-invert"
@@ -737,6 +740,8 @@ export default function Dashboard() {
                         </div>
                       ))}
                     </div>
+
+
                   </>
                 ) : (
                   <div className="text-center py-20">
@@ -774,7 +779,7 @@ export default function Dashboard() {
               <span className="text-xl text-indigo-600">AI is thinking...</span>
             </div>
           )}
-
+ 
           {/* Chat Input */}
           <div className="bg-white border-t border-gray-200 p-6 sticky bottom-0 shadow-md z-10">
             <form onSubmit={handleChatSubmit} className="max-w-4xl mx-auto grid grid-cols-4 gap-4 items-center">

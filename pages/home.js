@@ -81,7 +81,9 @@ export default function Home() {
       <Header />
       <main className="flex-grow pt-24">
 
-<Hero></Hero>
+<Hero>
+  
+</Hero>
         <section ref={inputRef} className="bg-white py-24">
           <div className="container mx-auto px-6">
             <motion.h1 
