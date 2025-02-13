@@ -219,27 +219,49 @@ export default function Dashboard() {
         </style>
 
       </Helmet>
-      <aside className="hidden md:flex w-16 bg-gray-50 shadow-md flex-col items-center py-6 space-y-6  border border-r-4 border-gray-300">
-        <Button variant="ghost" size="icon" className="text-black hover:bg-indigo-100 hover:text-black transition-colors duration-200">
+      <aside className="hidden md:flex w-16 bg-white shadow-md flex-col items-center py-6 border-r border-gray-200">
+      <div className="flex-1 flex flex-col items-center space-y-6">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="text-gray-600 hover:bg-indigo-100 hover:text-indigo-600 transition-colors duration-200"
+        >
           <MessageCircle className="h-6 w-6" />
         </Button>
-        <Button variant="ghost" size="icon" className="text-black hover:bg-indigo-100 hover:text-black transition-colors duration-200">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="text-gray-600 hover:bg-indigo-100 hover:text-indigo-600 transition-colors duration-200"
+        >
           <Users className="h-6 w-6" />
         </Button>
-        <Button variant="ghost" size="icon" className="text-black hover:bg-indigo-100 hover:text-black transition-colors duration-200">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="text-gray-600 hover:bg-indigo-100 hover:text-indigo-600 transition-colors duration-200"
+        >
           <Bell className="h-6 w-6" />
         </Button>
-        <Separator className="my-4 w-full bg-gray-200" />
-        <Button variant="ghost" size="icon" className="text-black hover:bg-indigo-100 hover:text-black transition-colors duration-200" onClick={toggleDetailSidebar}>
+      </div>
+      <div className="mt-auto flex flex-col items-center space-y-6">
+        <Separator className="w-8 bg-gray-200" />
+        <Button
+          variant="ghost"
+          size="icon"
+          className="text-gray-600 hover:bg-indigo-100 hover:text-indigo-600 transition-colors duration-200"
+          onClick={toggleDetailSidebar}
+        >
           <Menu className="h-6 w-6" />
         </Button>
-        <Button variant="ghost" size="icon" className="text-black hover:bg-indigo-100 hover:text-black transition-colors duration-200">
-          <Sun className="h-6 w-6" />
-        </Button>
-        <Button variant="ghost" size="icon" className="text-black hover:bg-indigo-100 hover:text-black transition-colors duration-200">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="text-gray-600 hover:bg-indigo-100 hover:text-indigo-600 transition-colors duration-200"
+        >
           <LogOut className="h-6 w-6" />
         </Button>
-      </aside>
+      </div>
+    </aside>
 
 
 
