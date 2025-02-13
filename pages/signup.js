@@ -14,10 +14,7 @@ export default function Home() {
   const { data: session } = useSession();
   const router = useRouter();
 
-  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [retypePassword, setRetypePassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -26,16 +23,14 @@ export default function Home() {
     }
   }, [session, router]);
 
-  const handleSubmit = async (e) => {
+  const handleEmailSignIn = async (e) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
-      // Simulate successful sign-up
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      router.push('/dashboard');
+      await signIn('email', { email, callbackUrl: '/dashboard' });
     } catch (error) {
-      console.error('Sign up failed:', error);
+      console.error('Sign-in failed:', error);
     } finally {
       setIsLoading(false);
     }
@@ -64,21 +59,7 @@ export default function Home() {
 
         <section className="max-w-md mx-auto mt-8 p-6 border-2 rounded-lg shadow-lg">
           <h2 className="text-2xl font-bold mb-6 text-center">Sign Up</h2>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-                Enter your name
-              </label>
-              <Input
-                id="name"
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
-                className="w-full border-b-2 border-red-300 focus:border-red-500 focus:ring-0 shadow-sm"
-              />
-            </div>
-
+          <form onSubmit={handleEmailSignIn} className="space-y-4">
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
                 Enter your email
@@ -93,40 +74,12 @@ export default function Home() {
               />
             </div>
 
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-                Enter a password
-              </label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                className="w-full border-b-2 border-red-300 focus:border-red-500 focus:ring-0 shadow-sm"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="retypePassword" className="block text-sm font-medium text-gray-700 mb-1">
-                Retype password
-              </label>
-              <Input
-                id="retypePassword"
-                type="password"
-                value={retypePassword}
-                onChange={(e) => setRetypePassword(e.target.value)}
-                required
-                className="w-full border-b-2 border-red-300 focus:border-red-500 focus:ring-0 shadow-sm"
-              />
-            </div>
-
             <Button
               type="submit"
               className="w-full bg-red-600 hover:bg-red-700 focus:ring-red-500 rounded-[30px] py-3"
               disabled={isLoading}
             >
-              {isLoading ? 'Signing Up...' : 'Sign Up'}
+              {isLoading ? 'Sending...' : 'Sign Up with Email'}
             </Button>
           </form>
 

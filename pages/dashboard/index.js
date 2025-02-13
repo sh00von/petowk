@@ -47,10 +47,15 @@ import { Helmet } from 'react-helmet';
 
 
 
+import { useRouter } from 'next/router';
+
 export default function Dashboard() {
+  
   const [isDetailSidebarOpen, setIsDetailSidebarOpen] = useState(true)
   const [inputValue, setInputValue] = useState('')
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const router = useRouter();
+
   const [chatMessages, setChatMessages] = useState([])
   const [isLoading, setIsLoading] = useState(false)
   const [queryType, setQueryType] = useState('symptom')
@@ -73,10 +78,13 @@ export default function Dashboard() {
   const [selectedPet, setSelectedPet] = useState(null)
 
   useEffect(() => {
-    if (status === "authenticated") {
-      fetchPetInfo()
+    if (status === 'authenticated') {
+      fetchPetInfo();
+    } else if (status === 'unauthenticated') {
+      // Redirect to the login page
+      router.push('/'); // Navigate to the homepage or login page
     }
-  }, [status])
+  }, [status, router]); // Adding `router` to dependencies
 
   useEffect(() => {
     const scrollArea = document.querySelector('.scroll-area');
@@ -180,27 +188,10 @@ export default function Dashboard() {
   }
 
   if (status === "unauthenticated") {
+    //redirect to login page
     return (
-      <div className="min-h-screen bg-gray-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="text-center space-y-6">
-            <h1 className="text-4xl font-bold text-black">Welcome to PETOWK</h1>
-            <p className="text-xl text-black">Your AI-powered pet care assistant</p>
-            <div className="bg-white p-6 rounded-xl shadow-md">
-              <h2 className="text-2xl font-semibold text-red-600 mb-4">You are not logged in</h2>
-              <p className="text-black mb-6">Please log in or sign up to access PETOWK's features and start caring for your pets with AI assistance.</p>
-              <div className="flex justify-center space-x-4">
-                <Button asChild className="bg-blue-500 hover:bg-blue-600 text-black py-2 px-6 rounded-xl shadow-md transition duration-200">
-                  <Link href="../">Log In</Link>
-                </Button>
-                <Button asChild variant="outline" className="bg-white hover:bg-gray-100 text-black py-2 px-6 rounded-xl shadow-md transition duration-200">
-                  <Link href="../signup">Sign Up</Link>
-                </Button>
-              </div>
-            </div>
-          </div>
-          <Features />
-        </div>
+      <div className="flex items-center justify-center h-screen bg-gray-100">
+        <p className="text-gray-800">Please sign in to access the dashboard.</p>
       </div>
     )
   }
@@ -674,11 +665,13 @@ export default function Dashboard() {
         <div className="flex-1 overflow-hidden flex flex-col bg-gray-50">
           <ScrollArea className="flex-1">
             <div className="container mx-auto px-4 py-8 bg-white">
-              <div className=" mx-auto space-y-8">
+              <div className="max-w-3xl mx-auto space-y-8">
                 {selectedPet ? (
                   <>
                     <div className="text-center">
-                      <h2 className="text-3xl font-bold mb-2 text-black">Chat with PETOWK AI about {selectedPet.petName}</h2>
+                      <h2 className="text-3xl font-bold mb-2 text-black">
+                        Chat with PETOWK AI about {selectedPet.petName}
+                      </h2>
                       <p className="text-black text-lg">
                         Ask questions about {selectedPet.petName}'s health, nutrition, or care.
                       </p>
@@ -687,24 +680,23 @@ export default function Dashboard() {
                       {chatMessages.map((message, index) => (
                         <div
                           key={index}
-                          className={`flex items-start ${message.role === 'user' ? 'justify-end' : 'justify-start'
-                            }`}
+                          className={`flex items-start ${message.role === "user" ? "justify-end" : "justify-start"}`}
                         >
-                          {message.role === 'assistant' && (
+                          {message.role === "assistant" && (
                             <div className="flex items-center space-x-2">
                               <div className="flex items-center justify-center h-10 w-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-white font-bold shadow-md">
                                 AI
                               </div>
                             </div>
-
                           )}
                           <div
-                            className={`max-w-[80%] p-3 rounded-xl ${message.role === 'user'
-                                ? 'bg-gray-100 mr-6 shadow-sm rounded-xl text-gray-800'
-                                : 'mx-4 rounded-xl bg-white shadow-sm text-gray-800'
-                              }`}
+                            className={`max-w-[80%] p-3 rounded-xl ${
+                              message.role === "user"
+                                ? "bg-indigo-100 text-indigo-900 ml-auto"
+                                : "bg-white shadow-md text-gray-800"
+                            }`}
                           >
-                            {message.role === 'user' ? (
+                            {message.role === "user" ? (
                               <p>{message.content}</p>
                             ) : (
                               <div
@@ -713,9 +705,10 @@ export default function Dashboard() {
                               />
                             )}
                           </div>
-                          {message.role === 'user' && (
+                          {message.role === "user" && (
                             <div className="flex items-center space-x-2">
-                              <div className="flex items-center justify-center h-10 w-10 rounded-full bg-gradient-to-br from-gray-500 to-gray-600 text-whitefont-bold shadow-md">       U
+                              <div className="flex items-center justify-center h-10 ml-4 w-10 rounded-full bg-gradient-to-br from-gray-500 to-gray-600 text-white font-bold shadow-md">
+                                U
                               </div>
                             </div>
                           )}
@@ -732,42 +725,53 @@ export default function Dashboard() {
                         : "You haven't added any pets yet. Create your first pet to get started!"}
                     </p>
                     {pets.length > 0 ? (
-                      <Button onClick={() => setIsDetailSidebarOpen(true)} className="bg-gray-800 hover:bg-gray-700 text-white shadow-md text-lg py-2 px-6 rounded-xl transition duration-300 ease-in-out">
+                      <Button
+                        onClick={() => setIsDetailSidebarOpen(true)}
+                        className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-md text-lg py-2 px-6 rounded-xl transition duration-300 ease-in-out"
+                      >
                         Select a Pet
                       </Button>
                     ) : (
-                      <CreatePetModal onSave={savePetInfo} trigger={
-                        <Button className="bg-gray-800 hover:bg-gray-700 text-white shadow-md text-lg py-2 px-6 rounded-xl transition duration-300 ease-in-out">
-                          Add Your First Pet
-                        </Button>
-                      } />
+                      <CreatePetModal
+                        onSave={savePetInfo}
+                        trigger={
+                          <Button className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-md text-lg py-2 px-6 rounded-xl transition duration-300 ease-in-out">
+                            Add Your First Pet
+                          </Button>
+                        }
+                      />
                     )}
                   </div>
                 )}
               </div>
             </div>
-          </ScrollArea>{isLoading && (
+          </ScrollArea>
+          {isLoading && (
             <div className="flex justify-center items-center space-x-2 mt-4 py-6">
-              <Loader2 className="h-5 w-5 animate-spin text-gray-600" />
-              <span className="text-xl text-gray-600">AI is thinking...</span>
+              <Loader2 className="h-5 w-5 animate-spin text-indigo-600" />
+              <span className="text-xl text-indigo-600">AI is thinking...</span>
             </div>
           )}
 
+          {/* Chat Input */}
           <div className="bg-white border-t border-gray-200 p-6 sticky bottom-0 shadow-md z-10">
-            <form
-              onSubmit={handleChatSubmit}
-              className="max-w-4xl mx-auto grid grid-cols-4 gap-4 items-center"
-            >
+            <form onSubmit={handleChatSubmit} className="max-w-4xl mx-auto grid grid-cols-4 gap-4 items-center">
               {/* Query Type Select */}
               <div className="col-span-4 md:col-span-1">
                 <Select value={queryType} onValueChange={setQueryType}>
-                  <SelectTrigger className="w-full bg-gray-50 border-gray-300 rounded-xl shadow-sm text-gray-800 hover:bg-gray-100 px-4 py-2 text-sm focus:ring-2 focus:ring-gray-400 focus:border-gray-400 focus:outline-none transition-colors duration-200">
+                  <SelectTrigger className="w-full bg-gray-50 border-gray-300 rounded-xl shadow-sm text-gray-800 hover:bg-gray-100 px-4 py-2 text-sm focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 focus:outline-none transition-colors duration-200">
                     <SelectValue placeholder="Choose a query type" />
                   </SelectTrigger>
                   <SelectContent className="bg-white border border-gray-200 rounded-xl shadow-md text-gray-800">
-                    <SelectItem className="hover:bg-gray-100 focus:bg-gray-200 rounded-xl" value="symptom">Symptom</SelectItem>
-                    <SelectItem className="hover:bg-gray-100 focus:bg-gray-200 rounded-xl" value="food">Food</SelectItem>
-                    <SelectItem className="hover:bg-gray-100 focus:bg-gray-200 rounded-xl" value="nutrition">Nutrition</SelectItem>
+                    <SelectItem className="hover:bg-gray-100 focus:bg-gray-200 rounded-xl" value="symptom">
+                      Symptom
+                    </SelectItem>
+                    <SelectItem className="hover:bg-gray-100 focus:bg-gray-200 rounded-xl" value="food">
+                      Food
+                    </SelectItem>
+                    <SelectItem className="hover:bg-gray-100 focus:bg-gray-200 rounded-xl" value="nutrition">
+                      Nutrition
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -785,7 +789,7 @@ export default function Dashboard() {
                 {/* Send Button */}
                 <Button
                   type="submit"
-                  className="bg-gray-800 hover:bg-gray-700 text-white rounded-xl px-6 py-2 font-semibold text-sm shadow-md hover:shadow-lg transform hover:scale-105 transition duration-300 ease-in-out"
+                  className="bg-gray-600 hover:bg-gray-700 text-white rounded-xl px-6 py-2 font-semibold text-sm shadow-md hover:shadow-lg transform hover:scale-105 transition duration-300 ease-in-out"
                   disabled={!selectedPet || isLoading}
                 >
                   <span className="flex items-center gap-2 text-white">
@@ -796,7 +800,6 @@ export default function Dashboard() {
               </div>
             </form>
           </div>
-
         </div>
       </main>
     </div>

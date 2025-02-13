@@ -25,7 +25,7 @@ function CreatePetModal(props) {
   };
 
   return (
-    <Dialog open={isOpen} className="bg-white" onOpenChange={setIsOpen}>
+    <Dialog open={isOpen} className="bg-white rounded-xl" onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         {trigger || <Button>Create Pet</Button>}
       </DialogTrigger>
@@ -43,7 +43,7 @@ function CreatePetModal(props) {
               placeholder="Pet Name"
               value={petName}
               onChange={(e) => setPetName(e.target.value)}
-              className="bg-indigo-100 border-indigo-300 text-indigo-900 placeholder-indigo-400 rounded-xl shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              className="bg-gray-100 border-gray-300 text-gray-900 placeholder-gray-400 rounded-xl shadow-sm focus:ring-2 focus:ring-gray-500 focus:border-transparent"
               required
             />
           </div>
@@ -54,7 +54,7 @@ function CreatePetModal(props) {
               type="number"
               value={petAge}
               onChange={(e) => setPetAge(e.target.value)}
-              className="bg-indigo-100 border-indigo-300 text-indigo-900 placeholder-indigo-400 rounded-xl shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              className="bg-gray-100 border-gray-300 text-gray-900 placeholder-gray-400 rounded-xl shadow-sm focus:ring-2 focus:ring-gray-500 focus:border-transparent"
               required
             />
           </div>
@@ -63,7 +63,7 @@ function CreatePetModal(props) {
           <Button
             type="submit"
             onClick={handleSave}
-            className="bg-indigo-500 text-white rounded-xl shadow-sm hover:bg-indigo-600 focus:ring-2 focus:ring-indigo-500"
+            className="bg-gray-800 hover:bg-gray-700 text-white shadow-md text-lg py-2 px-6 rounded-xl transition duration-300 ease-in-out"
           >
             Save Pet
           </Button>
