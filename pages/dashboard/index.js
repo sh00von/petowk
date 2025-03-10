@@ -62,9 +62,9 @@ export default function Dashboard() {
   const placeholderText = queryType === 'symptom'
     ? "Describe your pet's symptoms (e.g., 'coughing and sneezing')"
     : queryType === 'food'
-      ? "Ask about a specific food (e.g., 'Is chicken good for dogs?')"
+      ? "Ask about specific food such as Chicken ..."
       : queryType === 'nutrition'
-        ? "Ask about nutritional needs (e.g., 'Best diet for an overweight cat')"
+        ? "Ask about nutritional needs (e.g., 'Best diet for an overweight')"
         : "Select a query type and type your question"
 
 
@@ -356,14 +356,17 @@ export default function Dashboard() {
             </div>
 
             <div className="space-y-4 bg-white p-4 rounded-xl shadow-sm">
-              <h4 className="text-lg font-semibold text-gray-800">Add a New Pet</h4>
+            <div>
+  <h4 className="text-xl font-semibold text-gray-800">Add a New Pet</h4>
+  <p className="text-sm text-gray-500">e.g., Dog, Cat, Parrot, etc.</p>
+</div>
 
               <form onSubmit={(e) => {
                 e.preventDefault();
                 savePetInfo(petName, petAge);
               }} className="space-y-4">
                 <Input
-                  placeholder="Pet Name"
+                  placeholder="Pet Type"
                   value={petName}
                   onChange={(e) => setPetName(e.target.value)}
                   className="bg-gray-50 border-gray-300 text-gray-800 placeholder-gray-400 rounded-xl shadow-sm focus:ring-2 focus:ring-gray-400 focus:border-transparent"
@@ -516,13 +519,17 @@ export default function Dashboard() {
                     </div>
 
                     <div className="space-y-4 bg-white p-4 rounded-xl shadow-sm">
-                      <h4 className="text-lg font-semibold text-gray-800">Add a New Pet</h4>
+                    <div>
+  <h4 className="text-xl font-semibold text-gray-800">Add a New Pet</h4>
+  <p className="text-sm text-gray-500">e.g., Dog, Cat, Parrot, etc.</p>
+</div>
+
                       <form onSubmit={(e) => {
                         e.preventDefault();
                         savePetInfo(petName, petAge);
                       }} className="space-y-4">
                         <Input
-                          placeholder="Pet Name"
+                          placeholder="Pet Type"
                           value={petName}
                           onChange={(e) => setPetName(e.target.value)}
                           className="bg-gray-50 border-gray-300 text-gray-800 placeholder-gray-400 rounded-xl shadow-sm focus:ring-2 focus:ring-gray-400 focus:border-transparent"
