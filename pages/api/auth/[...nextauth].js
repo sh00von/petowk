@@ -10,6 +10,7 @@ export default NextAuth({
       clientId: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
     }),
+
     EmailProvider({
       server: {
         host: process.env.EMAIL_SERVER_HOST,
@@ -20,23 +21,55 @@ export default NextAuth({
         },
       },
       from: process.env.EMAIL_FROM,
+
+      sendVerificationRequest: async ({ identifier, url, provider }) => {
+        const { host } = new URL(url);
+        const nodemailer = require('nodemailer');
+      
+        const transport = nodemailer.createTransport(provider.server);
+      
+        await transport.sendMail({
+          to: identifier,
+          from: provider.from,
+          subject: '🐾 Sign in to PETOWK - Your AI Pet Assistant',
+          html: `
+            <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+              <h2 style="color: #4f46e5;">🐶 Welcome to PETOWK</h2>
+              <p>Hi there! You're just one click away from accessing <strong>PETOWK</strong>, your personalized AI assistant for your furry, feathered, or scaly friend.</p>
+              <p>Click the button below to sign in securely:</p>
+              <a href="${url}" style="display: inline-block; padding: 12px 24px; background-color: #4f46e5; color: #fff; border-radius: 6px; text-decoration: none; font-weight: bold;">
+                Sign in to PETOWK
+              </a>
+              <p>If the button doesn’t work, copy and paste this link into your browser:</p>
+              <p><a href="${url}" style="color: #4f46e5;">${url}</a></p>
+              <hr style="margin-top: 32px;" />
+              <p style="font-size: 12px; color: #777;">You received this email because someone attempted to sign in to PETOWK using this address. If this wasn’t you, no action is needed.</p>
+              <p style="font-size: 12px; color: #777;">🐾 Powered by PETOWK • AI Pet Assistant</p>
+            </div>
+          `,
+          text: `Sign in to PETOWK\n${url}`,
+        });
+      }
+      
     }),
   ],
-  adapter: MongoDBAdapter(clientPromise),  // Connect NextAuth with MongoDB
+
+  adapter: MongoDBAdapter(clientPromise), // Connect NextAuth with MongoDB
+
   pages: {
-    signIn: '/auth/signin', // Custom sign-in page (optional)
-    verifyRequest: '/auth/verify-request', // Custom email verification page
+    signIn: '/auth/signin',           // Optional custom sign-in page
+    verifyRequest: '/auth/verify-request', // Custom verification email page
   },
-  secret: process.env.NEXTAUTH_SECRET, // For JWT signing
+
+  secret: process.env.NEXTAUTH_SECRET, // For signing JWTs
+
   callbacks: {
     async session({ session, user }) {
-      // You can include additional custom session data here.
-      session.user.id = user.id; // Store the MongoDB user ID in the session
+      session.user.id = user.id;
       return session;
     },
     async signIn({ user, account, profile }) {
-      // You can perform custom logic here (e.g., save user data to MongoDB).
-      return true; // Continue the sign-in process
+      return true;
     },
   },
 });

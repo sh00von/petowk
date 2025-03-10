@@ -60,12 +60,13 @@ export default function Dashboard() {
   const [isLoading, setIsLoading] = useState(false)
   const [queryType, setQueryType] = useState('symptom')
   const placeholderText = queryType === 'symptom'
-    ? "Describe your pet's symptoms (e.g., 'coughing and sneezing')"
-    : queryType === 'food'
-      ? "Ask about specific food such as Chicken ..."
-      : queryType === 'nutrition'
-        ? "Ask about nutritional needs (e.g., 'Best diet for an overweight')"
-        : "Select a query type and type your question"
+  ? "Describe your pet's symptoms (e.g., 'coughing and sneezing')"
+  : queryType === 'food'
+    ? "Ask about specific food (e.g., 'chicken?')"
+    : queryType === 'nutrition'
+      ? "Ask about nutritional needs (e.g., 'Best diet for an overweight pet')"
+      : "Select a query type and type your question";
+
 
 
   const toggleDetailSidebar = () => setIsDetailSidebarOpen(!isDetailSidebarOpen)
@@ -590,10 +591,10 @@ export default function Dashboard() {
                           <Utensils className="mr-2 h-4 w-4" />
                           Food suggestion
                         </Button>
-                        <Button variant="ghost" className="w-full justify-start text-black hover:bg-violet-100">
+                        {/* <Button variant="ghost" className="w-full justify-start text-black hover:bg-violet-100">
                           <Apple className="mr-2 h-4 w-4" />
                           Nutrition checker
-                        </Button>
+                        </Button> */}
                         <Button variant="ghost" className="w-full justify-start text-black hover:bg-violet-100">
                           <Calendar className="mr-2 h-4 w-4" />
                           Vet booking
@@ -803,9 +804,9 @@ export default function Dashboard() {
                     <SelectItem className="hover:bg-gray-100 focus:bg-gray-200 rounded-xl" value="food">
                       Food
                     </SelectItem>
-                    <SelectItem className="hover:bg-gray-100 focus:bg-gray-200 rounded-xl" value="nutrition">
+                    {/* <SelectItem className="hover:bg-gray-100 focus:bg-gray-200 rounded-xl" value="nutrition">
                       Nutrition
-                    </SelectItem>
+                    </SelectItem> */}
                   </SelectContent>
                 </Select>
               </div>
