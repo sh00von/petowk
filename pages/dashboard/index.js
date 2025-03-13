@@ -1,12 +1,27 @@
-'use client'
-import { signOut } from 'next-auth/react';
-import { useState, useEffect, useRef } from 'react'
+"use client"
+import { signOut } from "next-auth/react"
+import { useState, useEffect, useRef } from "react"
 import { useSession } from "next-auth/react"
-import axios from 'axios'
-import { Menu, Sun, Eye, Plus,ArrowUp, ChevronDown, LogOut, Settings, Home, Send, Maximize2, MessageCircle, Users, Bell, Moon, X, Loader2, Trash2, Search, User, Utensils, Apple, Calendar, ChevronRight, PawPrint } from 'lucide-react'
+import axios from "axios"
+import {
+  Menu,
+  Plus,
+  ArrowUp,
+  LogOut,
+  Settings,
+  MessageCircle,
+  Users,
+  Bell,
+  Loader2,
+  Trash2,
+  User,
+  Utensils,
+  Calendar,
+  PawPrint,
+} from "lucide-react"
 import { Button } from "../../components/ui/button"
 import { Input } from "../../components/ui/input"
-import Head from 'next/head'
+import Head from "next/head"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,7 +32,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar"
 import { ScrollArea } from "../../components/ui/scroll-area"
 import { Separator } from "../../components/ui/separator"
 import { Sheet, SheetContent, SheetTrigger } from "../../components/ui/sheet"
-import ReactMarkdown from 'react-markdown'
 import {
   Select,
   SelectContent,
@@ -39,35 +53,33 @@ import {
   AlertDialogTrigger,
 } from "../../components/ui/alert-dialog"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs"
-import Link from 'next/link'
-import { Features } from '../../components/features'
-import CreatePetModal from '../../components/create-pet-modal';
-import { sanitizeHtml } from '../../lib/sanitizeHtml';
-import { Helmet } from 'react-helmet';
+import Link from "next/link"
+import CreatePetModal from "../../components/create-pet-modal"
+import { sanitizeHtml } from "../../lib/sanitizeHtml"
+import { Helmet } from "react-helmet"
 
-
-
-import { useRouter } from 'next/router';
+import { useRouter } from "next/router"
 
 export default function Dashboard() {
-  
   const [isDetailSidebarOpen, setIsDetailSidebarOpen] = useState(true)
-  const [inputValue, setInputValue] = useState('')
+  const [inputValue, setInputValue] = useState("")
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  const router = useRouter();
+  const router = useRouter()
 
   const [chatMessages, setChatMessages] = useState([])
   const [isLoading, setIsLoading] = useState(false)
-  const [queryType, setQueryType] = useState('symptom')
-  const placeholderText = queryType === 'symptom'
-  ? "Describe your pet's symptoms (e.g., 'coughing and sneezing')"
-  : queryType === 'food'
-    ? "Ask about specific food (e.g., 'chicken?')"
-    : queryType === 'nutrition'
-      ? "Ask about nutritional needs (e.g., 'Best diet for an overweight pet')"
-      : "Select a query type and type your question";
+  const [queryType, setQueryType] = useState("symptom")
+  const placeholderText =
+    queryType === "symptom"
+      ? "Describe your pet's symptoms (e.g., 'coughing and sneezing')"
+      : queryType === "food"
+        ? "Ask about specific food (e.g., 'chicken?')"
+        : queryType === "nutrition"
+          ? "Ask about nutritional needs (e.g., 'Best diet for an overweight pet')"
+          : "Select a query type and type your question"
 
-
+  const [showScrollToTop, setShowScrollToTop] = useState(false)
+  const scrollAreaRef = useRef(null)
 
   const toggleDetailSidebar = () => setIsDetailSidebarOpen(!isDetailSidebarOpen)
   const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen)
@@ -78,22 +90,74 @@ export default function Dashboard() {
   const [message, setMessage] = useState("")
   const [selectedPet, setSelectedPet] = useState(null)
 
-  const chatContainerRef = useRef(null);
+  const chatContainerRef = useRef(null)
   useEffect(() => {
-    if (status === 'authenticated') {
-      fetchPetInfo();
-    } else if (status === 'unauthenticated') {
+    if (status === "authenticated") {
+      fetchPetInfo()
+    } else if (status === "unauthenticated") {
       // Redirect to the login page
-      router.push('/'); // Navigate to the homepage or login page
+      router.push("/") // Navigate to the homepage or login page
     }
-  }, [status, router]); // Adding `router` to dependencies
+  }, [status, router]) // Adding `router` to dependencies
 
   useEffect(() => {
-    const scrollArea = document.querySelector('.scroll-area');
-    if (scrollArea) {
-      scrollArea.scrollTop = scrollArea.scrollHeight;
+    // Scroll to bottom when new messages are added
+    const scrollAreaElement = scrollAreaRef.current
+    if (scrollAreaElement && chatMessages.length > 0) {
+      const scrollableDiv = scrollAreaElement.querySelector("[data-radix-scroll-area-viewport]")
+      if (scrollableDiv) {
+        // Use setTimeout to ensure the DOM has updated with the new message
+        setTimeout(() => {
+          scrollableDiv.scrollTo({
+            top: scrollableDiv.scrollHeight,
+            behavior: "smooth",
+          })
+        }, 100)
+      }
     }
-  }, [chatMessages]);
+  }, [chatMessages])
+
+  // Add a new function to scroll to bottom that can be called programmatically
+  const scrollToBottom = () => {
+    const scrollAreaElement = scrollAreaRef.current
+    if (scrollAreaElement) {
+      const scrollableDiv = scrollAreaElement.querySelector("[data-radix-scroll-area-viewport]")
+      if (scrollableDiv) {
+        scrollableDiv.scrollTo({
+          top: scrollableDiv.scrollHeight,
+          behavior: "smooth",
+        })
+      }
+    }
+  }
+
+  useEffect(() => {
+    const scrollArea = document.querySelector(".scroll-area")
+    if (scrollArea) {
+      scrollArea.scrollTop = scrollArea.scrollHeight
+    }
+  }, [chatMessages])
+
+  useEffect(() => {
+    // Use a proper ref instead of querySelector
+    const scrollAreaElement = scrollAreaRef.current
+    if (scrollAreaElement) {
+      const handleScroll = () => {
+        // Get the actual scrollable div inside the ScrollArea component
+        const scrollableDiv = scrollAreaElement.querySelector("[data-radix-scroll-area-viewport]")
+        if (scrollableDiv) {
+          setShowScrollToTop(scrollableDiv.scrollTop > 300)
+        }
+      }
+
+      // Find the scrollable div and attach the event listener
+      const scrollableDiv = scrollAreaElement.querySelector("[data-radix-scroll-area-viewport]")
+      if (scrollableDiv) {
+        scrollableDiv.addEventListener("scroll", handleScroll)
+        return () => scrollableDiv.removeEventListener("scroll", handleScroll)
+      }
+    }
+  }, [])
 
   useEffect(() => {
     if (pets.length > 0 && !selectedPet) {
@@ -115,19 +179,18 @@ export default function Dashboard() {
     try {
       const res = await axios.post("/api/user/pet", {
         petName,
-        petAge: parseInt(petAge, 10),
+        petAge: Number.parseInt(petAge, 10),
         userEmail: session.user.email,
-      });
+      })
 
-      setMessage("Pet information saved successfully.");
-      fetchPetInfo();
-      setPetName("");
-      setPetAge("");
+      setMessage("Pet information saved successfully.")
+      fetchPetInfo()
+      setPetName("")
+      setPetAge("")
     } catch (error) {
-      setMessage(`Error: ${error.response?.data?.error || error.message}`);
+      setMessage(`Error: ${error.response?.data?.error || error.message}`)
     }
   }
-
 
   const deletePet = async (petId) => {
     try {
@@ -139,9 +202,8 @@ export default function Dashboard() {
     }
   }
 
-
   const handlePetClick = (petName, petAge) => {
-    localStorage.setItem('selectedPet', JSON.stringify({ petName, petAge }))
+    localStorage.setItem("selectedPet", JSON.stringify({ petName, petAge }))
     setSelectedPet({ petName, petAge })
   }
 
@@ -150,37 +212,62 @@ export default function Dashboard() {
     if (!inputValue.trim() || !selectedPet) return
 
     setIsLoading(true)
-    const newMessage = { role: 'user', content: inputValue }
+    const newMessage = { role: "user", content: inputValue }
     setChatMessages((prev) => [...prev, newMessage])
 
-    console.log('Sending request to API...')
+    console.log("Sending request to API...")
     const startTime = Date.now()
 
     try {
-      const response = await axios.post('/api/ollama', {
-        pet: selectedPet.petName,
-        [queryType]: inputValue,
-      }, {
-        timeout: 100000 // 100 seconds in milliseconds
-      });
+      const response = await axios.post(
+        "/api/ollama",
+        {
+          pet: selectedPet.petName,
+          [queryType]: inputValue,
+        },
+        {
+          timeout: 100000, // 100 seconds in milliseconds
+        },
+      )
 
-      console.log('API response received', response.data);
-      setChatMessages((prev) => [...prev, { role: 'assistant', content: response.data.suggestion }]);
+      console.log("API response received", response.data)
+      setChatMessages((prev) => [...prev, { role: "assistant", content: response.data.suggestion }])
     } catch (error) {
-      console.error('Error:', error);
-      if (axios.isAxiosError(error) && error.code === 'ECONNABORTED') {
-        setChatMessages((prev) => [...prev, { role: 'assistant', content: 'Sorry, the request timed out. Please try again.' }]);
+      console.error("Error:", error)
+      if (axios.isAxiosError(error) && error.code === "ECONNABORTED") {
+        setChatMessages((prev) => [
+          ...prev,
+          { role: "assistant", content: "Sorry, the request timed out. Please try again." },
+        ])
       } else {
-        setChatMessages((prev) => [...prev, { role: 'assistant', content: 'Sorry, I encountered an error. Please try again.' }]);
+        setChatMessages((prev) => [
+          ...prev,
+          { role: "assistant", content: "Sorry, I encountered an error. Please try again." },
+        ])
       }
     } finally {
       const endTime = Date.now()
       console.log(`Request took ${endTime - startTime}ms`)
       setIsLoading(false)
-      setInputValue('')
+      setInputValue("")
+      // Add a small delay to ensure the DOM has updated before scrolling
+      setTimeout(scrollToBottom, 150)
     }
   }
- 
+
+  const scrollToTop = () => {
+    const scrollAreaElement = scrollAreaRef.current
+    if (scrollAreaElement) {
+      const scrollableDiv = scrollAreaElement.querySelector("[data-radix-scroll-area-viewport]")
+      if (scrollableDiv) {
+        scrollableDiv.scrollTo({
+          top: 0,
+          behavior: "smooth",
+        })
+      }
+    }
+  }
+
   if (status === "loading") {
     return (
       <div className="flex items-center justify-center h-screen bg-gray-100">
@@ -201,12 +288,11 @@ export default function Dashboard() {
   return (
     <div className="flex h-screen bg-gray-100 text-gray-800">
       <Head>
-        <title>
-          PETOWK - AI-powered pet care assistant
-        </title>
+        <title>PETOWK - AI-powered pet care assistant</title>
       </Head>
       <Helmet>
-        <style>{`
+        <style>
+          {`
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
 
   body {
@@ -219,58 +305,56 @@ export default function Dashboard() {
     color: #4F46E5; /* indigo-600 */
   }`}
         </style>
-
       </Helmet>
       <aside className="hidden md:flex w-16 bg-white shadow-md flex-col items-center py-6 border-r border-gray-200">
-      <div className="flex-1 flex flex-col items-center space-y-6">
-        <Button
-          variant="ghost"
-          size="icon"
-          className="text-gray-600 hover:bg-indigo-100 hover:text-indigo-600 transition-colors duration-200"
-        >
-          <MessageCircle className="h-6 w-6" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="text-gray-600 hover:bg-indigo-100 hover:text-indigo-600 transition-colors duration-200"
-        >
-          <Users className="h-6 w-6" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="text-gray-600 hover:bg-indigo-100 hover:text-indigo-600 transition-colors duration-200"
-        >
-          <Bell className="h-6 w-6" />
-        </Button>
-      </div>
-      <div className="mt-auto flex flex-col items-center space-y-6">
-        <Separator className="w-8 bg-gray-200" />
-        <Button
-          variant="ghost"
-          size="icon"
-          className="text-gray-600 hover:bg-indigo-100 hover:text-indigo-600 transition-colors duration-200"
-          onClick={toggleDetailSidebar}
-        >
-          <Menu className="h-6 w-6" />
-        </Button>
-        <Button
-        onClick={() => signOut({ callbackUrl: '/' })}
-          variant="ghost"
-          size="icon"
-          className="text-gray-600 hover:bg-indigo-100 hover:text-indigo-600 transition-colors duration-200"
-        >
-          <LogOut className="h-6 w-6" />
-        </Button>
-      </div>
-    </aside>
-
-
+        <div className="flex-1 flex flex-col items-center space-y-6">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="text-gray-600 hover:bg-indigo-100 hover:text-indigo-600 transition-colors duration-200"
+          >
+            <MessageCircle className="h-6 w-6" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="text-gray-600 hover:bg-indigo-100 hover:text-indigo-600 transition-colors duration-200"
+          >
+            <Users className="h-6 w-6" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="text-gray-600 hover:bg-indigo-100 hover:text-indigo-600 transition-colors duration-200"
+          >
+            <Bell className="h-6 w-6" />
+          </Button>
+        </div>
+        <div className="mt-auto flex flex-col items-center space-y-6">
+          <Separator className="w-8 bg-gray-200" />
+          <Button
+            variant="ghost"
+            size="icon"
+            className="text-gray-600 hover:bg-indigo-100 hover:text-indigo-600 transition-colors duration-200"
+            onClick={toggleDetailSidebar}
+          >
+            <Menu className="h-6 w-6" />
+          </Button>
+          <Button
+            onClick={() => signOut({ callbackUrl: "/" })}
+            variant="ghost"
+            size="icon"
+            className="text-gray-600 hover:bg-indigo-100 hover:text-indigo-600 transition-colors duration-200"
+          >
+            <LogOut className="h-6 w-6" />
+          </Button>
+        </div>
+      </aside>
 
       <aside
-        className={`hidden md:flex border-r border-gray-200 transition-all duration-300 ease-in-out ${isDetailSidebarOpen ? 'w-64' : 'w-0'
-          } flex-col overflow-hidden bg-[#e7dfef] shadow-md`}
+        className={`hidden md:flex border-r border-gray-200 transition-all duration-300 ease-in-out ${
+          isDetailSidebarOpen ? "w-64" : "w-0"
+        } flex-col overflow-hidden bg-[#e7dfef] shadow-md`}
       >
         <ScrollArea className="flex-grow">
           <div className="p-2 space-y-2">
@@ -294,29 +378,24 @@ export default function Dashboard() {
                   {pets.map((pet) => (
                     <div
                       key={pet._id}
-                      className={`flex items-center justify-between p-3 rounded-xl border ${selectedPet && selectedPet.petName === pet.petName
-                        ? 'bg-[#E6DEEE] border-gray-300 shadow-sm'
-                        : 'bg-white border-gray-200'
-                        } transition-all duration-200 ease-in-out hover:shadow-sm`}
+                      className={`flex items-center justify-between p-3 rounded-xl border ${
+                        selectedPet && selectedPet.petName === pet.petName
+                          ? "bg-[#E6DEEE] border-gray-300 shadow-sm"
+                          : "bg-white border-gray-200"
+                      } transition-all duration-200 ease-in-out hover:shadow-sm`}
                     >
-                      <div
-                        className="cursor-pointer flex-grow"
-                        onClick={() => handlePetClick(pet.petName, pet.petAge)}
-                      >
+                      <div className="cursor-pointer flex-grow" onClick={() => handlePetClick(pet.petName, pet.petAge)}>
                         <div
-                          className={`font-medium ${selectedPet && selectedPet.petName === pet.petName ? 'text-black' : 'text-black'
-                            }`}
+                          className={`font-medium ${
+                            selectedPet && selectedPet.petName === pet.petName ? "text-black" : "text-black"
+                          }`}
                         >
                           {pet.petName}
                         </div>
                         <div className="text-sm text-black">{`Age: ${pet.petAge} months`}</div>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="text-black hover:text-black hover:bg-indigo-100"
-                        >
+                        <Button variant="ghost" size="icon" className="text-black hover:text-black hover:bg-indigo-100">
                           <Settings className="h-4 w-4" />
                         </Button>
                         <AlertDialog>
@@ -337,7 +416,9 @@ export default function Dashboard() {
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
-                              <AlertDialogCancel className="bg-indigo-100 text-black hover:bg-indigo-200">Cancel</AlertDialogCancel>
+                              <AlertDialogCancel className="bg-indigo-100 text-black hover:bg-indigo-200">
+                                Cancel
+                              </AlertDialogCancel>
                               <AlertDialogAction
                                 className="bg-red-600 text-black hover:bg-red-700"
                                 onClick={() => deletePet(pet._id)}
@@ -357,15 +438,18 @@ export default function Dashboard() {
             </div>
 
             <div className="space-y-4 bg-white p-4 rounded-xl shadow-sm">
-            <div>
-  <h4 className="text-xl font-semibold text-gray-800">Add a New Pet</h4>
-  <p className="text-sm text-gray-500">e.g., Dog, Cat, Parrot, etc.</p>
-</div>
+              <div>
+                <h4 className="text-xl font-semibold text-gray-800">Add a New Pet</h4>
+                <p className="text-sm text-gray-500">e.g., Dog, Cat, Parrot, etc.</p>
+              </div>
 
-              <form onSubmit={(e) => {
-                e.preventDefault();
-                savePetInfo(petName, petAge);
-              }} className="space-y-4">
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault()
+                  savePetInfo(petName, petAge)
+                }}
+                className="space-y-4"
+              >
                 <Input
                   placeholder="Pet Type"
                   value={petName}
@@ -412,16 +496,17 @@ export default function Dashboard() {
                 </SelectContent>
               </Select>
             </div>
-
-
-
           </div>
         </ScrollArea>
       </aside>
 
       <Sheet>
         <SheetTrigger asChild>
-          <Button variant="ghost" size="icon" className="md:hidden fixed top-4 left-4 z-50 bg-white shadow-md rounded-full">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="md:hidden fixed top-4 left-4 z-50 bg-white shadow-md rounded-full"
+          >
             <Menu className="h-6 w-6" />
           </Button>
         </SheetTrigger>
@@ -430,9 +515,15 @@ export default function Dashboard() {
             <div className="border-b border-gray-200 flex justify-between items-center pt-8 pb-8">
               <Tabs defaultValue="pets" className="flex-1">
                 <TabsList className="w-full justify-start bg-white rounded-2xl p-1 h-12 space-x-1">
-                  <TabsTrigger value="pets" className="flex-1 data-[state=active]:bg-indigo-200 rounded-xl">Pets</TabsTrigger>
-                  <TabsTrigger value="services" className="flex-1 data-[state=active]:bg-indigo-200 rounded-xl">Services</TabsTrigger>
-                  <TabsTrigger value="account" className="flex-1 data-[state=active]:bg-indigo-200 rounded-xl">Account</TabsTrigger>
+                  <TabsTrigger value="pets" className="flex-1 data-[state=active]:bg-indigo-200 rounded-xl">
+                    Pets
+                  </TabsTrigger>
+                  <TabsTrigger value="services" className="flex-1 data-[state=active]:bg-indigo-200 rounded-xl">
+                    Services
+                  </TabsTrigger>
+                  <TabsTrigger value="account" className="flex-1 data-[state=active]:bg-indigo-200 rounded-xl">
+                    Account
+                  </TabsTrigger>
                 </TabsList>
 
                 {/* Scroll Area for Tabs Content */}
@@ -456,18 +547,20 @@ export default function Dashboard() {
                             {pets.map((pet) => (
                               <div
                                 key={pet._id}
-                                className={`flex items-center justify-between p-3 rounded-xl border ${selectedPet && selectedPet.petName === pet.petName
-                                  ? 'bg-gray-100 border-gray-300 shadow-sm'
-                                  : 'bg-white border-gray-200'
-                                  } transition-all duration-200 ease-in-out hover:shadow-sm`}
+                                className={`flex items-center justify-between p-3 rounded-xl border ${
+                                  selectedPet && selectedPet.petName === pet.petName
+                                    ? "bg-gray-100 border-gray-300 shadow-sm"
+                                    : "bg-white border-gray-200"
+                                } transition-all duration-200 ease-in-out hover:shadow-sm`}
                               >
                                 <div
                                   className="cursor-pointer flex-grow"
                                   onClick={() => handlePetClick(pet.petName, pet.petAge)}
                                 >
                                   <div
-                                    className={`font-medium ${selectedPet && selectedPet.petName === pet.petName ? 'text-black' : 'text-black'
-                                      }`}
+                                    className={`font-medium ${
+                                      selectedPet && selectedPet.petName === pet.petName ? "text-black" : "text-black"
+                                    }`}
                                   >
                                     {pet.petName}
                                   </div>
@@ -499,7 +592,9 @@ export default function Dashboard() {
                                         </AlertDialogDescription>
                                       </AlertDialogHeader>
                                       <AlertDialogFooter>
-                                        <AlertDialogCancel className="bg-indigo-100 text-black hover:bg-indigo-200">Cancel</AlertDialogCancel>
+                                        <AlertDialogCancel className="bg-indigo-100 text-black hover:bg-indigo-200">
+                                          Cancel
+                                        </AlertDialogCancel>
                                         <AlertDialogAction
                                           className="bg-red-600 text-black hover:bg-red-700"
                                           onClick={() => deletePet(pet._id)}
@@ -520,15 +615,18 @@ export default function Dashboard() {
                     </div>
 
                     <div className="space-y-4 bg-white p-4 rounded-xl shadow-sm">
-                    <div>
-  <h4 className="text-xl font-semibold text-gray-800">Add a New Pet</h4>
-  <p className="text-sm text-gray-500">e.g., Dog, Cat, Parrot, etc.</p>
-</div>
+                      <div>
+                        <h4 className="text-xl font-semibold text-gray-800">Add a New Pet</h4>
+                        <p className="text-sm text-gray-500">e.g., Dog, Cat, Parrot, etc.</p>
+                      </div>
 
-                      <form onSubmit={(e) => {
-                        e.preventDefault();
-                        savePetInfo(petName, petAge);
-                      }} className="space-y-4">
+                      <form
+                        onSubmit={(e) => {
+                          e.preventDefault()
+                          savePetInfo(petName, petAge)
+                        }}
+                        className="space-y-4"
+                      >
                         <Input
                           placeholder="Pet Type"
                           value={petName}
@@ -574,8 +672,6 @@ export default function Dashboard() {
                         </SelectContent>
                       </Select>
                     </div>
-
-
                   </TabsContent>
 
                   {/* Services Tab Content */}
@@ -616,7 +712,11 @@ export default function Dashboard() {
                           <Settings className="mr-2 h-4 w-4" />
                           Settings
                         </Button>
-                        <Button variant="ghost" onClick={() => signOut({ callbackUrl: '/' })} className="w-full justify-start text-black hover:bg-violet-100">
+                        <Button
+                          variant="ghost"
+                          onClick={() => signOut({ callbackUrl: "/" })}
+                          className="w-full justify-start text-black hover:bg-violet-100"
+                        >
                           <LogOut className="mr-2 h-4 w-4" />
                           Log out
                         </Button>
@@ -629,7 +729,6 @@ export default function Dashboard() {
           </div>
         </SheetContent>
       </Sheet>
-
 
       <main className="flex-1 flex flex-col bg-gray-50 overflow-hidden">
         <header className="bg-white border-b border-gray-200 sticky top-0 z-10 shadow-sm">
@@ -647,21 +746,24 @@ export default function Dashboard() {
               </div>
 
               <div className="flex items-center space-x-4">
-                <CreatePetModal onSave={savePetInfo} trigger={
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="hidden md:flex bg-white text-gray-800 border-gray-300 hover:bg-gray-100 hover:text-gray-900 rounded-xl shadow-sm hover:shadow-md transition duration-300 ease-in-out"
-                  >
-                    <Plus className="mr-2 h-4 w-4 text-gray-600" />
-                    Add Pet
-                  </Button>
-
-
-
-
-                } />
-                <Button variant="ghost" size="icon" className="text-gray-600 hover:bg-gray-100 hover:text-gray-800 rounded-xl">
+                <CreatePetModal
+                  onSave={savePetInfo}
+                  trigger={
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="hidden md:flex bg-white text-gray-800 border-gray-300 hover:bg-gray-100 hover:text-gray-900 rounded-xl shadow-sm hover:shadow-md transition duration-300 ease-in-out"
+                    >
+                      <Plus className="mr-2 h-4 w-4 text-gray-600" />
+                      Add Pet
+                    </Button>
+                  }
+                />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="text-gray-600 hover:bg-gray-100 hover:text-gray-800 rounded-xl"
+                >
                   <Bell className="h-5 w-5" />
                 </Button>
                 <DropdownMenu>
@@ -673,7 +775,10 @@ export default function Dashboard() {
                       </Avatar>
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-56 bg-white shadow-lg rounded-xl border border-gray-200">
+                  <DropdownMenuContent
+                    align="end"
+                    className="w-56 bg-white shadow-lg rounded-xl border border-gray-200"
+                  >
                     <DropdownMenuItem className="hover:bg-gray-100 rounded-xl">
                       <User className="mr-2 h-4 w-4" />
                       <span>Profile</span>
@@ -682,7 +787,10 @@ export default function Dashboard() {
                       <Settings className="mr-2 h-4 w-4" />
                       <span>Settings</span>
                     </DropdownMenuItem>
-                    <DropdownMenuItem className="hover:bg-gray-100 rounded-xl" onClick={() => signOut({ callbackUrl: '/' })}>
+                    <DropdownMenuItem
+                      className="hover:bg-gray-100 rounded-xl"
+                      onClick={() => signOut({ callbackUrl: "/" })}
+                    >
                       <LogOut className="mr-2 h-4 w-4" />
                       <span>Log out</span>
                     </DropdownMenuItem>
@@ -693,21 +801,30 @@ export default function Dashboard() {
           </div>
         </header>
 
-
         <div className="flex-1 overflow-hidden flex flex-col bg-gray-50">
-          <ScrollArea className="flex-1">
+          <ScrollArea className="flex-1" ref={scrollAreaRef}>
+            {showScrollToTop && (
+              <Button
+                onClick={scrollToTop}
+                className="fixed bottom-24 right-6 z-50 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full shadow-lg p-3 transition-all duration-300 ease-in-out"
+                size="icon"
+                aria-label="Scroll to top"
+              >
+                <ArrowUp className="h-5 w-5" />
+              </Button>
+            )}
             <div className="container mx-auto px-4 py-8 bg-white">
               <div className="">
                 {selectedPet ? (
                   <>
                     <div className="text-center sticky top-0 bg-white z-10 p-4 ">
-  <h2 className="text-3xl font-bold mb-2 text-black">
-    Chat with PETOWK AI about {selectedPet.petName}
-  </h2>
-  <p className="text-black text-lg">
-    Ask questions about {selectedPet.petName}'s health, nutrition, or care.
-  </p>
-</div>               
+                      <h2 className="text-3xl font-bold mb-2 text-black">
+                        Chat with PETOWK AI about {selectedPet.petName}
+                      </h2>
+                      <p className="text-black text-lg">
+                        Ask questions about {selectedPet.petName}'s health, nutrition, or care.
+                      </p>
+                    </div>
                     <div className="space-y-4 max-w-4xl mx-auto mt-8">
                       {chatMessages.map((message, index) => (
                         <div
@@ -730,7 +847,6 @@ export default function Dashboard() {
                           >
                             {message.role === "user" ? (
                               <p id={`${index + 1}`}>{message.content}</p>
-
                             ) : (
                               <div
                                 className="prose prose-sm max-w-none dark:prose-invert"
@@ -748,8 +864,6 @@ export default function Dashboard() {
                         </div>
                       ))}
                     </div>
-
-
                   </>
                 ) : (
                   <div className="text-center py-20">
@@ -787,7 +901,7 @@ export default function Dashboard() {
               <span className="text-xl text-indigo-600">AI is thinking...</span>
             </div>
           )}
- 
+
           {/* Chat Input */}
           <div className="bg-white border-t border-gray-200 p-6 sticky bottom-0 shadow-md z-10">
             <form onSubmit={handleChatSubmit} className="max-w-4xl mx-auto grid grid-cols-4 gap-4 items-center">
