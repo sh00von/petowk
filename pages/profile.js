@@ -34,12 +34,10 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Separator } from "@/components/ui/separator"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-// import { useToast } from "@/hooks/use-toast"
 
 export default function ProfilePage() {
   const { data: session, status } = useSession()
   const router = useRouter()
-//   const { toast } = useToast()
 
   const [isLoading, setIsLoading] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
@@ -50,49 +48,45 @@ export default function ProfilePage() {
     address: "",
     bio: "",
   })
+  const [hasFetchedProfile, setHasFetchedProfile] = useState(false)
 
   // For sidebar toggle (similar to Dashboard)
   const [isDetailSidebarOpen, setIsDetailSidebarOpen] = useState(true)
   const toggleDetailSidebar = () => setIsDetailSidebarOpen(!isDetailSidebarOpen)
 
+  const userEmail = session?.user?.email
+
   useEffect(() => {
     if (status === "unauthenticated") {
       router.push("/")
-    } else if (status === "authenticated" && session?.user) {
+    } else if (status === "authenticated" && session?.user && userEmail && !hasFetchedProfile) {
       // Initialize with session data
-      setProfileData((prevData) => ({
+      setProfileData(prevData => ({
         ...prevData,
         name: session.user.name || "",
-        email: session.user.email || "",
+        email: userEmail,
       }))
-
       // Fetch additional profile data
-      fetchProfileData()
+      fetchProfileData().then(() => setHasFetchedProfile(true))
     }
-  }, [status, session, router])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [status, userEmail, hasFetchedProfile, router])
 
   const fetchProfileData = async () => {
-    if (!session?.user?.email) return
-
+    if (!userEmail) return
     setIsLoading(true)
     try {
-      const res = await axios.get(`/api/user/profile?email=${encodeURIComponent(session.user.email)}`)
+      const res = await axios.get(`/api/user/profile?email=${encodeURIComponent(userEmail)}`)
       if (res.data) {
-        setProfileData((prevData) => ({
+        setProfileData(prevData => ({
           ...prevData,
           ...res.data,
           // Keep email from session as it's the primary identifier
-          email: session.user.email || "",
+          email: userEmail,
         }))
       }
     } catch (error) {
       console.error("Error fetching profile:", error)
-      toast({
-        title: "Error",
-        description: "Failed to load profile data. Please try again.",
-        variant: "destructive",
-      })
-      // If profile doesn't exist yet, that's okay - we'll create it on save
     } finally {
       setIsLoading(false)
     }
@@ -100,7 +94,7 @@ export default function ProfilePage() {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target
-    setProfileData((prevData) => ({
+    setProfileData(prevData => ({
       ...prevData,
       [name]: value,
     }))
@@ -109,40 +103,25 @@ export default function ProfilePage() {
   const handleSubmit = async (e) => {
     e.preventDefault()
 
-    if (!session?.user?.email) {
-      toast({
-        title: "Error",
-        description: "You must be logged in to update your profile",
-        variant: "destructive",
-      })
+    if (!userEmail) {
+      console.error("You must be logged in to update your profile")
       return
     }
 
     setIsSaving(true)
     try {
-      const response = await axios.post("/api/user/profile", {
+      await axios.post("/api/user/profile", {
         ...profileData,
-        email: session.user.email,
+        email: userEmail,
       })
-
-      toast({
-        title: "Profile Updated",
-        description: "Your profile information has been saved successfully.",
-      })
+      console.log("Profile Updated: Your profile information has been saved successfully.")
 
       // Update session data if name changed
       if (profileData.name !== session.user.name) {
-        // Note: In a real app, you might need to refresh the session
-        // This is a simplified approach
         session.user.name = profileData.name
       }
     } catch (error) {
       console.error("Error saving profile:", error)
-      toast({
-        title: "Error",
-        description: "Failed to update profile. Please try again.",
-        variant: "destructive",
-      })
     } finally {
       setIsSaving(false)
     }
@@ -345,24 +324,17 @@ export default function ProfilePage() {
             </Link>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                  <Avatar className="h-8 w-8">
-                    <AvatarImage src="/placeholder.svg" alt={session?.user?.name || "User"} />
-                    <AvatarFallback>{session?.user?.name?.[0] || "U"}</AvatarFallback>
-                  </Avatar>
-                </Button>
+              <div className="flex items-center space-x-2">
+                <div className="flex items-center justify-center h-10 w-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-white font-bold shadow-md">
+                  {session?.user?.name?.slice(0, 2).toUpperCase() || "US"}
+                </div>
+              </div>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56 bg-white rounded-xl border border-gray-200">
                 <Link href="/profile">
                   <DropdownMenuItem className="hover:bg-gray-100 rounded-xl">
                     <User className="mr-2 h-4 w-4" />
                     <span>Profile</span>
-                  </DropdownMenuItem>
-                </Link>
-                <Link href="/settings">
-                  <DropdownMenuItem className="hover:bg-gray-100 rounded-xl">
-                    <Settings className="mr-2 h-4 w-4" />
-                    <span>Settings</span>
                   </DropdownMenuItem>
                 </Link>
                 <DropdownMenuItem
@@ -496,4 +468,3 @@ export default function ProfilePage() {
     </div>
   )
 }
-
