@@ -607,11 +607,12 @@ export default function Dashboard() {
         <ScrollArea className="flex-grow">
           <div className="p-2 space-y-2">
             <div className="flex items-center gap-3 bg-white p-4 rounded-xl shadow-sm">
-              <div className="flex items-center space-x-2">
-                <div className="flex items-center justify-center h-10 w-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-white font-bold shadow-md">
-                  {session?.user?.name?.slice(0, 2).toUpperCase() || "US"}
-                </div>
-              </div>
+            <div className="flex items-center space-x-2">
+  <div className="flex items-center justify-center h-10 w-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-white font-bold shadow-md border-2 border-[#222]">
+  {session?.user?.name?.slice(0, 2).toUpperCase() || "US"}
+  </div>
+</div>
+
 
               <div>
                 <div className="text-sm text-black">Welcome,</div>
@@ -1066,9 +1067,12 @@ export default function Dashboard() {
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-                      <div className="flex items-center justify-center h-10 w-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-white font-bold shadow-md">
-                        {session?.user?.name?.slice(0, 2).toUpperCase() || "US"}
-                      </div>
+                    <div className="flex items-center space-x-2">
+  <div className="flex items-center justify-center h-10 w-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-white font-bold shadow-md border-2 border-[#222]">
+    {session?.user?.name?.slice(0, 2).toUpperCase() || "US"}
+  </div>
+</div>
+
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent

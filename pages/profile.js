@@ -204,24 +204,31 @@ export default function ProfilePage() {
                 <p>Vet Booking</p>
               </TooltipContent>
             </Tooltip>
-
             <Tooltip>
               <TooltipTrigger asChild>
-                <Link href="/profile">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="text-indigo-600 bg-indigo-100 hover:bg-indigo-200 transition-colors duration-200"
-                  >
-                    <User className="h-6 w-6" />
-                  </Button>
-                </Link>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="text-gray-600 hover:bg-indigo-100 hover:text-indigo-600 transition-colors duration-200"
+                  onClick={() => {
+                    // Email subscription functionality
+                    const email = prompt("Enter your email to subscribe to our newsletter:")
+                    if (email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                      alert(`Thank you! ${email} has been subscribed to our newsletter.`)
+                      // Here you would typically call an API to save the email
+                    } else if (email) {
+                      alert("Please enter a valid email address.")
+                    }
+                  }}
+                >
+                  <Mail className="h-6 w-6" />
+                </Button>
               </TooltipTrigger>
               <TooltipContent
                 side="right"
                 className="bg-[#F6F0F0] text-black border-none rounded-lg px-3 py-1.5 text-sm font-medium shadow-lg"
               >
-                <p>Profile</p>
+                <p>Subscribe to Newsletter</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
