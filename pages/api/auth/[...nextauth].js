@@ -1,10 +1,11 @@
-import NextAuth from 'next-auth';
-import GoogleProvider from 'next-auth/providers/google';
-import EmailProvider from 'next-auth/providers/email';
-import { MongoDBAdapter } from '@next-auth/mongodb-adapter';
-import clientPromise from '../../../lib/mongodb'; // MongoDB client promise
+import NextAuth from "next-auth"
+import GoogleProvider from "next-auth/providers/google"
+import EmailProvider from "next-auth/providers/email"
+import { MongoDBAdapter } from "@next-auth/mongodb-adapter"
+import clientPromise from "../../../lib/mongodb" // MongoDB client promise
 
-export default NextAuth({
+// Define authOptions as a constant
+const authOptions = {
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID,
@@ -23,15 +24,15 @@ export default NextAuth({
       from: process.env.EMAIL_FROM,
 
       sendVerificationRequest: async ({ identifier, url, provider }) => {
-        const { host } = new URL(url);
-        const nodemailer = require('nodemailer');
-      
-        const transport = nodemailer.createTransport(provider.server);
-      
+        const { host } = new URL(url)
+        const nodemailer = require("nodemailer")
+
+        const transport = nodemailer.createTransport(provider.server)
+
         await transport.sendMail({
           to: identifier,
           from: provider.from,
-          subject: '🐾 Sign in to PETOWK - Your AI Pet Assistant',
+          subject: "🐾 Sign in to PETOWK - Your AI Pet Assistant",
           html: `
             <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
               <h2 style="color: #4f46e5;">🐶 Welcome to PETOWK</h2>
@@ -40,36 +41,47 @@ export default NextAuth({
               <a href="${url}" style="display: inline-block; padding: 12px 24px; background-color: #4f46e5; color: #fff; border-radius: 6px; text-decoration: none; font-weight: bold;">
                 Sign in to PETOWK
               </a>
-              <p>If the button doesn’t work, copy and paste this link into your browser:</p>
+              <p>If the button doesn't work, copy and paste this link into your browser:</p>
               <p><a href="${url}" style="color: #4f46e5;">${url}</a></p>
               <hr style="margin-top: 32px;" />
-              <p style="font-size: 12px; color: #777;">You received this email because someone attempted to sign in to PETOWK using this address. If this wasn’t you, no action is needed.</p>
+              <p style="font-size: 12px; color: #777;">You received this email because someone attempted to sign in to PETOWK using this address. If this wasn't you, no action is needed.</p>
               <p style="font-size: 12px; color: #777;">🐾 Powered by PETOWK • AI Pet Assistant</p>
             </div>
           `,
           text: `Sign in to PETOWK\n${url}`,
-        });
-      }
-      
+        })
+      },
     }),
   ],
 
   adapter: MongoDBAdapter(clientPromise), // Connect NextAuth with MongoDB
 
   pages: {
-    signIn: '/auth/signin',           // Optional custom sign-in page
-    verifyRequest: '/auth/verify-request', // Custom verification email page
+    signIn: "/auth/signin", // Optional custom sign-in page
+    verifyRequest: "/auth/verify-request", // Custom verification email page
   },
 
   secret: process.env.NEXTAUTH_SECRET, // For signing JWTs
 
   callbacks: {
     async session({ session, user }) {
-      session.user.id = user.id;
-      return session;
+      session.user.id = user.id
+      return session
     },
     async signIn({ user, account, profile }) {
-      return true;
+      return true
     },
   },
-});
+}
+
+// Export authOptions as default
+//export default NextAuth(authOptions);
+
+// Make authOptions available for other files
+//export { authOptions };
+
+//import { authOptions } from '../../../lib/auth'; // This line is redundant and causes the error
+
+// Export the NextAuth handler with the authOptions
+export default NextAuth(authOptions)
+

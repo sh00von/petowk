@@ -13,7 +13,6 @@ import {
   Loader2,
   Trash2,
   User,
-  Calendar,
   PawPrint,
   Home,
   Mail,
@@ -28,7 +27,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../../components/ui/dropdown-menu"
-import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar"
+import { Avatar, AvatarFallback } from "../../components/ui/avatar"
 import { ScrollArea } from "../../components/ui/scroll-area"
 import { Separator } from "../../components/ui/separator"
 import { Sheet, SheetContent, SheetTrigger } from "../../components/ui/sheet"
@@ -1016,14 +1015,12 @@ export default function Dashboard() {
                     <div className="bg-white p-4 rounded-2xl shadow-sm">
                       <h3 className="text-lg font-semibold text-black mb-4">Account Settings</h3>
                       <div className="space-y-2">
-                        <Button variant="ghost" className="w-full justify-start text-black hover:bg-violet-100">
-                          <User className="mr-2 h-4 w-4" />
-                          Profile
-                        </Button>
-                        <Button variant="ghost" className="w-full justify-start text-black hover:bg-violet-100">
-                          <Settings className="mr-2 h-4 w-4" />
-                          Settings
-                        </Button>
+                        <Link href="/profile">
+                          <Button variant="ghost" className="w-full justify-start text-black hover:bg-violet-100">
+                            <User className="mr-2 h-4 w-4" />
+                            Profile
+                          </Button>
+                        </Link>
                         <Button
                           variant="ghost"
                           onClick={() => signOut({ callbackUrl: "/" })}
@@ -1061,33 +1058,29 @@ export default function Dashboard() {
                 <Link href="/vet-booking">
                   <Button
                     size="sm"
-                    className="hidden md:flex bg-blue-600 hover:bg-blue-700 text-white border-blue-700 rounded-xl shadow-sm hover:shadow-md transition duration-300 ease-in-out"
+                    className="hidden md:flex bg-blue-600 hover:bg-purple-700 text-white border-blue-700 rounded-xl shadow-sm hover:shadow-md transition duration-300 ease-in-out text-base px-6 py-2"
                   >
-                    <Calendar className="mr-2 h-4 w-4" />
                     Book Vet
                   </Button>
                 </Link>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                      <Avatar className="h-8 w-8 rounded-xl">
-                        <AvatarImage src="/placeholder.svg" alt={session?.user?.name || "User"} />
-                        <AvatarFallback>{session?.user?.name?.[0] || "U"}</AvatarFallback>
-                      </Avatar>
+                    <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+                      <div className="flex items-center justify-center h-10 w-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-white font-bold shadow-md">
+                        {session?.user?.name?.slice(0, 2).toUpperCase() || "US"}
+                      </div>
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent
                     align="end"
                     className="w-56 bg-white shadow-lg rounded-xl border border-gray-200"
                   >
-                    <DropdownMenuItem className="hover:bg-gray-100 rounded-xl">
-                      <User className="mr-2 h-4 w-4" />
-                      <span>Profile</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem className="hover:bg-gray-100 rounded-xl">
-                      <Settings className="mr-2 h-4 w-4" />
-                      <span>Settings</span>
-                    </DropdownMenuItem>
+                    <Link href="/profile">
+                      <DropdownMenuItem className="hover:bg-gray-100 rounded-xl">
+                        <User className="mr-2 h-4 w-4" />
+                        <span>Profile</span>
+                      </DropdownMenuItem>
+                    </Link>
                     <DropdownMenuItem
                       className="hover:bg-gray-100 rounded-xl"
                       onClick={() => signOut({ callbackUrl: "/" })}
