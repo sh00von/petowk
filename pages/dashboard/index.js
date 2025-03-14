@@ -10,14 +10,14 @@ import {
   LogOut,
   Settings,
   MessageCircle,
-  Users,
-  Bell,
   Loader2,
   Trash2,
   User,
-  Utensils,
   Calendar,
   PawPrint,
+  Home,
+  Mail,
+  Stethoscope,
 } from "lucide-react"
 import { Button } from "../../components/ui/button"
 import { Input } from "../../components/ui/input"
@@ -57,8 +57,113 @@ import Link from "next/link"
 import CreatePetModal from "../../components/create-pet-modal"
 import { sanitizeHtml } from "../../lib/sanitizeHtml"
 import { Helmet } from "react-helmet"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../../components/ui/tooltip"
 
 import { useRouter } from "next/router"
+
+// 1. First, let's create a new modal component for editing pet details
+// Add this function before the main Dashboard component
+
+function EditPetModal({ isOpen, onClose, pet, onSave }) {
+  const [editName, setEditName] = useState(pet?.petName || "")
+  const [editAge, setEditAge] = useState(pet?.petAge || "")
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [error, setError] = useState("")
+
+  // Reset form values when pet changes
+  useEffect(() => {
+    if (pet) {
+      setEditName(pet.petName || "")
+      setEditAge(pet.petAge || "")
+      setError("")
+    }
+  }, [pet])
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+
+    if (!editName.trim()) {
+      setError("Pet name is required")
+      return
+    }
+
+    if (!editAge || isNaN(Number(editAge)) || Number(editAge) <= 0) {
+      setError("Please enter a valid age")
+      return
+    }
+
+    setIsSubmitting(true)
+    setError("")
+
+    try {
+      await onSave(pet._id, editName, editAge)
+      onClose()
+    } catch (err) {
+      setError(`Failed to update: ${err.message}`)
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  return (
+    <AlertDialog open={isOpen} onOpenChange={onClose}>
+      <AlertDialogContent className="bg-white">
+        <AlertDialogHeader>
+          <AlertDialogTitle>Edit Pet Details</AlertDialogTitle>
+          <AlertDialogDescription className="text-black">Update your pet's information below.</AlertDialogDescription>
+        </AlertDialogHeader>
+        <form onSubmit={handleSubmit} className="space-y-4 py-2">
+          <div className="space-y-2">
+            <label htmlFor="petName" className="text-sm font-medium text-gray-700">
+              Pet Name
+            </label>
+            <Input
+              id="petName"
+              value={editName}
+              onChange={(e) => setEditName(e.target.value)}
+              className="bg-gray-50 border-gray-300 text-gray-800 rounded-xl"
+              required
+            />
+          </div>
+          <div className="space-y-2">
+            <label htmlFor="petAge" className="text-sm font-medium text-gray-700">
+              Pet Age (months)
+            </label>
+            <Input
+              id="petAge"
+              type="number"
+              value={editAge}
+              onChange={(e) => setEditAge(e.target.value)}
+              className="bg-gray-50 border-gray-300 text-gray-800 rounded-xl"
+              required
+              min="1"
+            />
+          </div>
+          {error && <div className="text-red-500 text-sm mt-2">{error}</div>}
+        </form>
+        <AlertDialogFooter>
+          <AlertDialogCancel className="bg-gray-100 text-black hover:bg-gray-200 rounded-xl" disabled={isSubmitting}>
+            Cancel
+          </AlertDialogCancel>
+          <AlertDialogAction
+            className="bg-blue-600 text-white hover:bg-blue-700 rounded-xl"
+            onClick={handleSubmit}
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? (
+              <div className="flex items-center">
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Saving...
+              </div>
+            ) : (
+              "Save Changes"
+            )}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  )
+}
 
 export default function Dashboard() {
   const [isDetailSidebarOpen, setIsDetailSidebarOpen] = useState(true)
@@ -80,6 +185,12 @@ export default function Dashboard() {
 
   const [showScrollToTop, setShowScrollToTop] = useState(false)
   const scrollAreaRef = useRef(null)
+
+  // 2. Now, let's add state and function for the edit modal in the Dashboard component
+  // Add these to the state declarations at the top of the Dashboard component
+
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  const [petToEdit, setPetToEdit] = useState(null)
 
   const toggleDetailSidebar = () => setIsDetailSidebarOpen(!isDetailSidebarOpen)
   const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen)
@@ -115,6 +226,9 @@ export default function Dashboard() {
         }, 100)
       }
     }
+
+    // Show scroll to top button only if there's more than one chat response
+    setShowScrollToTop(chatMessages.length > 2)
   }, [chatMessages])
 
   // Add a new function to scroll to bottom that can be called programmatically
@@ -139,25 +253,24 @@ export default function Dashboard() {
   }, [chatMessages])
 
   useEffect(() => {
-    // Use a proper ref instead of querySelector
+    // Update the useEffect for scroll handling to add fade-out effect
     const scrollAreaElement = scrollAreaRef.current
     if (scrollAreaElement) {
       const handleScroll = () => {
-        // Get the actual scrollable div inside the ScrollArea component
         const scrollableDiv = scrollAreaElement.querySelector("[data-radix-scroll-area-viewport]")
         if (scrollableDiv) {
-          setShowScrollToTop(scrollableDiv.scrollTop > 300)
+          const shouldShow = chatMessages.length > 2 && scrollableDiv.scrollTop > 300
+          setShowScrollToTop(shouldShow)
         }
       }
 
-      // Find the scrollable div and attach the event listener
       const scrollableDiv = scrollAreaElement.querySelector("[data-radix-scroll-area-viewport]")
       if (scrollableDiv) {
         scrollableDiv.addEventListener("scroll", handleScroll)
         return () => scrollableDiv.removeEventListener("scroll", handleScroll)
       }
     }
-  }, [])
+  }, [chatMessages.length])
 
   useEffect(() => {
     if (pets.length > 0 && !selectedPet) {
@@ -202,9 +315,56 @@ export default function Dashboard() {
     }
   }
 
+  // 3. Add the updatePet function to handle saving edited pet details
+  // Add this function after the deletePet function
+
+  const updatePet = async (petId, newName, newAge) => {
+    try {
+      // First, update the UI optimistically
+      const updatedPets = pets.map((pet) =>
+        pet._id === petId ? { ...pet, petName: newName, petAge: Number.parseInt(newAge, 10) } : pet,
+      )
+      setPets(updatedPets)
+
+      // If this pet was selected, update the selected pet too
+      if (selectedPet && selectedPet.petName === petToEdit?.petName) {
+        setSelectedPet({ petName: newName, petAge: Number.parseInt(newAge, 10) })
+      }
+
+      // Then make the API call
+      const response = await axios.put("/api/user/pet", {
+        petId,
+        petName: newName,
+        petAge: Number.parseInt(newAge, 10),
+        userEmail: session.user.email,
+      })
+
+      console.log("Update response:", response.data)
+      setMessage("Pet updated successfully.")
+
+      // Refresh the pet list to ensure we have the latest data
+      await fetchPetInfo()
+      return response.data
+    } catch (error) {
+      console.error("Update error:", error)
+      setMessage(`Error: ${error.response?.data?.error || error.message}`)
+      // If there was an error, refresh the pet list to revert any optimistic updates
+      await fetchPetInfo()
+      throw error
+    }
+  }
+
   const handlePetClick = (petName, petAge) => {
     localStorage.setItem("selectedPet", JSON.stringify({ petName, petAge }))
     setSelectedPet({ petName, petAge })
+  }
+
+  // 4. Add a function to handle opening the edit modal
+  // Add this function after the handlePetClick function
+
+  const handleEditPet = (pet) => {
+    setPetToEdit({ ...pet }) // Make a copy to avoid reference issues
+    setIsEditModalOpen(true)
   }
 
   const handleChatSubmit = async (e) => {
@@ -308,46 +468,135 @@ export default function Dashboard() {
       </Helmet>
       <aside className="hidden md:flex w-16 bg-white shadow-md flex-col items-center py-6 border-r border-gray-200">
         <div className="flex-1 flex flex-col items-center space-y-6">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="text-gray-600 hover:bg-indigo-100 hover:text-indigo-600 transition-colors duration-200"
-          >
-            <MessageCircle className="h-6 w-6" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="text-gray-600 hover:bg-indigo-100 hover:text-indigo-600 transition-colors duration-200"
-          >
-            <Users className="h-6 w-6" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="text-gray-600 hover:bg-indigo-100 hover:text-indigo-600 transition-colors duration-200"
-          >
-            <Bell className="h-6 w-6" />
-          </Button>
+          <TooltipProvider delayDuration={300}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Link href="/">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="text-gray-600 hover:bg-indigo-100 hover:text-indigo-600 transition-colors duration-200"
+                  >
+                    <Home className="h-6 w-6" />
+                  </Button>
+                </Link>
+              </TooltipTrigger>
+              <TooltipContent
+                side="right"
+                className="bg-[#F6F0F0] text-black border-none rounded-lg px-3 py-1.5 text-sm font-medium shadow-lg"
+              >
+                <p>Home</p>
+              </TooltipContent>
+            </Tooltip>
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="text-gray-600 hover:bg-indigo-100 hover:text-indigo-600 transition-colors duration-200"
+                >
+                  <MessageCircle className="h-6 w-6" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent
+                side="right"
+                className="bg-[#F6F0F0] text-black border-none rounded-lg px-3 py-1.5 text-sm font-medium shadow-lg"
+              >
+                <p>Chat</p>
+              </TooltipContent>
+            </Tooltip>
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Link href="/vet-booking">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="text-gray-600 hover:bg-indigo-100 hover:text-indigo-600 transition-colors duration-200"
+                  >
+                    <Stethoscope className="h-6 w-6" />
+                  </Button>
+                </Link>
+              </TooltipTrigger>
+              <TooltipContent
+                side="right"
+                className="bg-[#F6F0F0] text-black border-none rounded-lg px-3 py-1.5 text-sm font-medium shadow-lg"
+              >
+                <p>Vet Booking</p>
+              </TooltipContent>
+            </Tooltip>
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="text-gray-600 hover:bg-indigo-100 hover:text-indigo-600 transition-colors duration-200"
+                  onClick={() => {
+                    // Email subscription functionality
+                    const email = prompt("Enter your email to subscribe to our newsletter:")
+                    if (email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                      alert(`Thank you! ${email} has been subscribed to our newsletter.`)
+                      // Here you would typically call an API to save the email
+                    } else if (email) {
+                      alert("Please enter a valid email address.")
+                    }
+                  }}
+                >
+                  <Mail className="h-6 w-6" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent
+                side="right"
+                className="bg-[#F6F0F0] text-black border-none rounded-lg px-3 py-1.5 text-sm font-medium shadow-lg"
+              >
+                <p>Subscribe to Newsletter</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
         <div className="mt-auto flex flex-col items-center space-y-6">
           <Separator className="w-8 bg-gray-200" />
-          <Button
-            variant="ghost"
-            size="icon"
-            className="text-gray-600 hover:bg-indigo-100 hover:text-indigo-600 transition-colors duration-200"
-            onClick={toggleDetailSidebar}
-          >
-            <Menu className="h-6 w-6" />
-          </Button>
-          <Button
-            onClick={() => signOut({ callbackUrl: "/" })}
-            variant="ghost"
-            size="icon"
-            className="text-gray-600 hover:bg-indigo-100 hover:text-indigo-600 transition-colors duration-200"
-          >
-            <LogOut className="h-6 w-6" />
-          </Button>
+          <TooltipProvider delayDuration={300}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="text-gray-600 hover:bg-indigo-100 hover:text-indigo-600 transition-colors duration-200"
+                  onClick={toggleDetailSidebar}
+                >
+                  <Menu className="h-6 w-6" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent
+                side="right"
+                className="bg-[#F6F0F0] text-black border-none rounded-lg px-3 py-1.5 text-sm font-medium shadow-lg"
+              >
+                <p>Toggle Sidebar</p>
+              </TooltipContent>
+            </Tooltip>
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  onClick={() => signOut({ callbackUrl: "/" })}
+                  variant="ghost"
+                  size="icon"
+                  className="text-gray-600 hover:bg-indigo-100 hover:text-indigo-600 transition-colors duration-200"
+                >
+                  <LogOut className="h-6 w-6" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent
+                side="right"
+                className="bg-[#F6F0F0] text-black border-none rounded-lg px-3 py-1.5 text-sm font-medium shadow-lg"
+              >
+                <p>Log Out</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
       </aside>
 
@@ -395,19 +644,48 @@ export default function Dashboard() {
                         <div className="text-sm text-black">{`Age: ${pet.petAge} months`}</div>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <Button variant="ghost" size="icon" className="text-black hover:text-black hover:bg-indigo-100">
-                          <Settings className="h-4 w-4" />
-                        </Button>
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="text-black hover:text-black hover:bg-indigo-100"
+                        <TooltipProvider delayDuration={300}>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="text-black hover:text-black hover:bg-indigo-100"
+                                onClick={() => handleEditPet(pet)}
+                              >
+                                <Settings className="h-4 w-4" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent
+                              side="right"
+                              className="bg-[#F6F0F0] text-black border-none rounded-lg px-3 py-1.5 text-sm font-medium shadow-lg"
                             >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </AlertDialogTrigger>
+                              <p>Edit Pet</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                        <AlertDialog>
+                          <TooltipProvider delayDuration={300}>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <AlertDialogTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="text-black hover:text-black hover:bg-indigo-100"
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </AlertDialogTrigger>
+                              </TooltipTrigger>
+                              <TooltipContent
+                                side="right"
+                                className="bg-[#F6F0F0] text-black border-none rounded-lg px-3 py-1.5 text-sm font-medium shadow-lg"
+                              >
+                                <p>Delete Pet</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
                           <AlertDialogContent className="bg-white">
                             <AlertDialogHeader>
                               <AlertDialogTitle>Are you sure?</AlertDialogTitle>
@@ -416,11 +694,11 @@ export default function Dashboard() {
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
-                              <AlertDialogCancel className="bg-indigo-100 text-black hover:bg-indigo-200">
+                              <AlertDialogCancel className="bg-indigo-100 text-black hover:bg-indigo-200 rounded-xl">
                                 Cancel
                               </AlertDialogCancel>
                               <AlertDialogAction
-                                className="bg-red-600 text-black hover:bg-red-700"
+                                className="bg-[#f90000] text-white hover:bg-red-700 rounded-xl"
                                 onClick={() => deletePet(pet._id)}
                               >
                                 Delete
@@ -567,23 +845,48 @@ export default function Dashboard() {
                                   <div className="text-sm text-black">{`Age: ${pet.petAge} months`}</div>
                                 </div>
                                 <div className="flex items-center space-x-2">
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="text-black hover:text-black hover:bg-indigo-100"
-                                  >
-                                    <Settings className="h-4 w-4" />
-                                  </Button>
-                                  <AlertDialog>
-                                    <AlertDialogTrigger asChild>
-                                      <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        className="text-black hover:text-black hover:bg-indigo-100"
+                                  <TooltipProvider delayDuration={300}>
+                                    <Tooltip>
+                                      <TooltipTrigger asChild>
+                                        <Button
+                                          variant="ghost"
+                                          size="icon"
+                                          className="text-black hover:text-black hover:bg-indigo-100"
+                                          onClick={() => handleEditPet(pet)}
+                                        >
+                                          <Settings className="h-4 w-4" />
+                                        </Button>
+                                      </TooltipTrigger>
+                                      <TooltipContent
+                                        side="right"
+                                        className="bg-[#F6F0F0] text-black border-none rounded-lg px-3 py-1.5 text-sm font-medium shadow-lg"
                                       >
-                                        <Trash2 className="h-4 w-4" />
-                                      </Button>
-                                    </AlertDialogTrigger>
+                                        <p>Edit Pet</p>
+                                      </TooltipContent>
+                                    </Tooltip>
+                                  </TooltipProvider>
+                                  <AlertDialog>
+                                    <TooltipProvider delayDuration={300}>
+                                      <Tooltip>
+                                        <TooltipTrigger asChild>
+                                          <AlertDialogTrigger asChild>
+                                            <Button
+                                              variant="ghost"
+                                              size="icon"
+                                              className="text-black hover:text-black hover:bg-indigo-100"
+                                            >
+                                              <Trash2 className="h-4 w-4" />
+                                            </Button>
+                                          </AlertDialogTrigger>
+                                        </TooltipTrigger>
+                                        <TooltipContent
+                                          side="right"
+                                          className="bg-[#F6F0F0] text-black border-none rounded-lg px-3 py-1.5 text-sm font-medium shadow-lg"
+                                        >
+                                          <p>Delete Pet</p>
+                                        </TooltipContent>
+                                      </Tooltip>
+                                    </TooltipProvider>
                                     <AlertDialogContent className="bg-white">
                                       <AlertDialogHeader>
                                         <AlertDialogTitle>Are you sure?</AlertDialogTitle>
@@ -592,11 +895,11 @@ export default function Dashboard() {
                                         </AlertDialogDescription>
                                       </AlertDialogHeader>
                                       <AlertDialogFooter>
-                                        <AlertDialogCancel className="bg-indigo-100 text-black hover:bg-indigo-200">
+                                        <AlertDialogCancel className="bg-indigo-100 text-black hover:bg-indigo-200 rounded-xl">
                                           Cancel
                                         </AlertDialogCancel>
                                         <AlertDialogAction
-                                          className="bg-red-600 text-black hover:bg-red-700"
+                                          className="bg-[#f90000] text-white hover:bg-red-700 rounded-xl"
                                           onClick={() => deletePet(pet._id)}
                                         >
                                           Delete
@@ -683,17 +986,26 @@ export default function Dashboard() {
                           <MessageCircle className="mr-2 h-4 w-4" />
                           Chat with AI Vet
                         </Button>
-                        <Button variant="ghost" className="w-full justify-start text-black hover:bg-violet-100">
-                          <Utensils className="mr-2 h-4 w-4" />
-                          Food suggestion
-                        </Button>
-                        {/* <Button variant="ghost" className="w-full justify-start text-black hover:bg-violet-100">
-                          <Apple className="mr-2 h-4 w-4" />
-                          Nutrition checker
-                        </Button> */}
-                        <Button variant="ghost" className="w-full justify-start text-black hover:bg-violet-100">
-                          <Calendar className="mr-2 h-4 w-4" />
-                          Vet booking
+                        <Link href="/vet-booking" className="w-full">
+                          <Button variant="ghost" className="w-full justify-start text-black hover:bg-violet-100">
+                            <Stethoscope className="mr-2 h-4 w-4" />
+                            Vet Booking
+                          </Button>
+                        </Link>
+                        <Button
+                          variant="ghost"
+                          className="w-full justify-start text-black hover:bg-violet-100"
+                          onClick={() => {
+                            const email = prompt("Enter your email to subscribe to our newsletter:")
+                            if (email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                              alert(`Thank you! ${email} has been subscribed to our newsletter.`)
+                            } else if (email) {
+                              alert("Please enter a valid email address.")
+                            }
+                          }}
+                        >
+                          <Mail className="mr-2 h-4 w-4" />
+                          Subscribe to Newsletter
                         </Button>
                       </nav>
                     </div>
@@ -746,26 +1058,15 @@ export default function Dashboard() {
               </div>
 
               <div className="flex items-center space-x-4">
-                <CreatePetModal
-                  onSave={savePetInfo}
-                  trigger={
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="hidden md:flex bg-white text-gray-800 border-gray-300 hover:bg-gray-100 hover:text-gray-900 rounded-xl shadow-sm hover:shadow-md transition duration-300 ease-in-out"
-                    >
-                      <Plus className="mr-2 h-4 w-4 text-gray-600" />
-                      Add Pet
-                    </Button>
-                  }
-                />
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="text-gray-600 hover:bg-gray-100 hover:text-gray-800 rounded-xl"
-                >
-                  <Bell className="h-5 w-5" />
-                </Button>
+                <Link href="/vet-booking">
+                  <Button
+                    size="sm"
+                    className="hidden md:flex bg-blue-600 hover:bg-blue-700 text-white border-blue-700 rounded-xl shadow-sm hover:shadow-md transition duration-300 ease-in-out"
+                  >
+                    <Calendar className="mr-2 h-4 w-4" />
+                    Book Vet
+                  </Button>
+                </Link>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="relative h-8 w-8 rounded-full">
@@ -804,14 +1105,27 @@ export default function Dashboard() {
         <div className="flex-1 overflow-hidden flex flex-col bg-gray-50">
           <ScrollArea className="flex-1" ref={scrollAreaRef}>
             {showScrollToTop && (
-              <Button
-                onClick={scrollToTop}
-                className="fixed bottom-24 right-6 z-50 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full shadow-lg p-3 transition-all duration-300 ease-in-out"
-                size="icon"
-                aria-label="Scroll to top"
-              >
-                <ArrowUp className="h-5 w-5" />
-              </Button>
+              <TooltipProvider delayDuration={300}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      onClick={scrollToTop}
+                      className="fixed bottom-24 right-6 z-50 bg-[#f90000] hover:bg-red-700 text-white rounded-full shadow-lg p-4 transition-all duration-300 ease-in-out opacity-90 hover:opacity-100"
+                      size="icon"
+                      aria-label="Scroll to top"
+                    >
+                      <ArrowUp className="h-6 w-6 text-white" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent
+                    side="right"
+                    className="bg-[#F6F0F0] text-black border-none rounded-lg px-3 py-1.5 text-sm font-medium shadow-lg"
+                    sideOffset={5}
+                  >
+                    <p>Back to Top</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             )}
             <div className="container mx-auto px-4 py-8 bg-white">
               <div className="">
@@ -951,6 +1265,14 @@ export default function Dashboard() {
           </div>
         </div>
       </main>
+      {petToEdit && (
+        <EditPetModal
+          isOpen={isEditModalOpen}
+          onClose={() => setIsEditModalOpen(false)}
+          pet={petToEdit}
+          onSave={updatePet}
+        />
+      )}
     </div>
   )
 }
