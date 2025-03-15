@@ -309,10 +309,21 @@ export default function ProfilePage() {
               </Button>
             </Link>
             <Link href="/profile">
-              <Button variant="ghost" className="w-full justify-start bg-indigo-100">
-                <User className="mr-2 h-4 w-4" />
-                Profile
-              </Button>
+            <Button
+                          variant="ghost"
+                          className="w-full justify-start text-black hover:bg-violet-100"
+                          onClick={() => {
+                            const email = prompt("Enter your email to subscribe to our newsletter:")
+                            if (email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                              alert(`Thank you! ${email} has been subscribed to our newsletter.`)
+                            } else if (email) {
+                              alert("Please enter a valid email address.")
+                            }
+                          }}
+                        >
+                          <Mail className="mr-2 h-4 w-4" />
+                          Subscribe to Newsletter
+                        </Button>
             </Link>
             <Button variant="ghost" className="w-full justify-start" onClick={() => signOut({ callbackUrl: "/" })}>
               <LogOut className="mr-2 h-4 w-4" />
@@ -332,10 +343,10 @@ export default function ProfilePage() {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
               <div className="flex items-center space-x-2">
-                <div className="flex items-center justify-center h-10 w-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-white font-bold shadow-md">
-                  {session?.user?.name?.slice(0, 2).toUpperCase() || "US"}
-                </div>
-              </div>
+  <div className="flex items-center justify-center h-10 w-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-white font-bold shadow-md border-2 border-[#222]">
+    {session?.user?.name?.slice(0, 2).toUpperCase() || "US"}
+  </div>
+</div>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56 bg-white rounded-xl border border-gray-200">
                 <Link href="/profile">
