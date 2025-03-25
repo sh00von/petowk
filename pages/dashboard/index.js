@@ -3,21 +3,7 @@ import { signOut } from "next-auth/react"
 import { useState, useEffect, useRef } from "react"
 import { useSession } from "next-auth/react"
 import axios from "axios"
-import {
-  Menu,
-  Plus,
-  ArrowUp,
-  LogOut,
-  Settings,
-  MessageCircle,
-  Loader2,
-  Trash2,
-  User,
-  PawPrint,
-  Home,
-  Mail,
-  Stethoscope,
-} from "lucide-react"
+import { Menu, ArrowUp, LogOut, MessageCircle, Loader2, User, PawPrint, Home, Mail, Stethoscope } from "lucide-react"
 import { Button } from "../../components/ui/button"
 import { Input } from "../../components/ui/input"
 import Head from "next/head"
@@ -40,129 +26,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../../components/ui/select"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "../../components/ui/alert-dialog"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs"
 import Link from "next/link"
-import CreatePetModal from "../../components/create-pet-modal"
 import { sanitizeHtml } from "../../lib/sanitizeHtml"
 import { Helmet } from "react-helmet"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../../components/ui/tooltip"
 
 import { useRouter } from "next/router"
+import { createClient } from "@supabase/supabase-js"
 
-// 1. First, let's create a new modal component for editing pet details
-// Add this function before the main Dashboard component
-
-function EditPetModal({ isOpen, onClose, pet, onSave }) {
-  const [editName, setEditName] = useState(pet?.petName || "")
-  const [editAge, setEditAge] = useState(pet?.petAge || "")
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [error, setError] = useState("")
-
-  // Reset form values when pet changes
-  useEffect(() => {
-    if (pet) {
-      setEditName(pet.petName || "")
-      setEditAge(pet.petAge || "")
-      setError("")
-    }
-  }, [pet])
-
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-
-    if (!editName.trim()) {
-      setError("Pet name is required")
-      return
-    }
-
-    if (!editAge || isNaN(Number(editAge)) || Number(editAge) <= 0) {
-      setError("Please enter a valid age")
-      return
-    }
-
-    setIsSubmitting(true)
-    setError("")
-
-    try {
-      await onSave(pet._id, editName, editAge)
-      onClose()
-    } catch (err) {
-      setError(`Failed to update: ${err.message}`)
-    } finally {
-      setIsSubmitting(false)
-    }
-  }
-
-  return (
-    <AlertDialog open={isOpen} onOpenChange={onClose}>
-      <AlertDialogContent className="bg-white">
-        <AlertDialogHeader>
-          <AlertDialogTitle>Edit Pet Details</AlertDialogTitle>
-          <AlertDialogDescription className="text-black">Update your pet's information below.</AlertDialogDescription>
-        </AlertDialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4 py-2">
-          <div className="space-y-2">
-            <label htmlFor="petName" className="text-sm font-medium text-gray-700">
-              Pet Name
-            </label>
-            <Input
-              id="petName"
-              value={editName}
-              onChange={(e) => setEditName(e.target.value)}
-              className="bg-gray-50 border-gray-300 text-gray-800 rounded-xl"
-              required
-            />
-          </div>
-          <div className="space-y-2">
-            <label htmlFor="petAge" className="text-sm font-medium text-gray-700">
-              Pet Age (months)
-            </label>
-            <Input
-              id="petAge"
-              type="number"
-              value={editAge}
-              onChange={(e) => setEditAge(e.target.value)}
-              className="bg-gray-50 border-gray-300 text-gray-800 rounded-xl"
-              required
-              min="1"
-            />
-          </div>
-          {error && <div className="text-red-500 text-sm mt-2">{error}</div>}
-        </form>
-        <AlertDialogFooter>
-          <AlertDialogCancel className="bg-gray-100 text-black hover:bg-gray-200 rounded-xl" disabled={isSubmitting}>
-            Cancel
-          </AlertDialogCancel>
-          <AlertDialogAction
-            className="bg-blue-600 text-white hover:bg-blue-700 rounded-xl"
-            onClick={handleSubmit}
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? (
-              <div className="flex items-center">
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Saving...
-              </div>
-            ) : (
-              "Save Changes"
-            )}
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
-  )
-}
+// Initialize Supabase client
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ""
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ""
+const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
 export default function Dashboard() {
   const [isDetailSidebarOpen, setIsDetailSidebarOpen] = useState(true)
@@ -185,10 +61,6 @@ export default function Dashboard() {
   const [showScrollToTop, setShowScrollToTop] = useState(false)
   const scrollAreaRef = useRef(null)
 
-  // 2. Now, let's add state and function for the edit modal in the Dashboard component
-  // Add these to the state declarations at the top of the Dashboard component
-
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [petToEdit, setPetToEdit] = useState(null)
 
   const toggleDetailSidebar = () => setIsDetailSidebarOpen(!isDetailSidebarOpen)
@@ -201,10 +73,42 @@ export default function Dashboard() {
   const [selectedPet, setSelectedPet] = useState(null)
 
   const chatContainerRef = useRef(null)
+
+  const logToSupabase = async (logType, data) => {
+    try {
+      const { error } = await supabase.from("logs").insert({
+        log_type: logType,
+        user_email: session?.user?.email,
+        data: data,
+        created_at: new Date().toISOString(),
+      })
+
+      if (error) {
+        console.error("Error logging to Supabase:", error)
+      }
+    } catch (err) {
+      console.error("Failed to log to Supabase:", err)
+    }
+  }
+
   useEffect(() => {
     if (status === "authenticated") {
+      // Log session data
+      logToSupabase("session_authenticated", {
+        user: {
+          email: session?.user?.email,
+          name: session?.user?.name,
+        },
+        timestamp: new Date().toISOString(),
+      })
+
       fetchPetInfo()
     } else if (status === "unauthenticated") {
+      // Log logout or unauthenticated access
+      logToSupabase("session_unauthenticated", {
+        timestamp: new Date().toISOString(),
+      })
+
       // Redirect to the login page
       router.push("/") // Navigate to the homepage or login page
     }
@@ -280,90 +184,50 @@ export default function Dashboard() {
 
   const fetchPetInfo = async () => {
     try {
-      const res = await axios.get(`/api/user/pet?userEmail=${session?.user?.email}`)
-      setPets(res.data)
-    } catch (error) {
-      setMessage(`Error fetching pets: ${error.response?.data?.error || error.message}`)
-    }
-  }
-
-  const savePetInfo = async (petName, petAge) => {
-    try {
-      const res = await axios.post("/api/user/pet", {
-        petName,
-        petAge: Number.parseInt(petAge, 10),
-        userEmail: session.user.email,
-      })
-
-      setMessage("Pet information saved successfully.")
-      fetchPetInfo()
-      setPetName("")
-      setPetAge("")
-    } catch (error) {
-      setMessage(`Error: ${error.response?.data?.error || error.message}`)
-    }
-  }
-
-  const deletePet = async (petId) => {
-    try {
-      await axios.delete("/api/user/pet", { data: { petId } })
-      setMessage("Pet deleted successfully.")
-      fetchPetInfo()
-    } catch (error) {
-      setMessage(`Error: ${error.response?.data?.error || error.message}`)
-    }
-  }
-
-  // 3. Add the updatePet function to handle saving edited pet details
-  // Add this function after the deletePet function
-
-  const updatePet = async (petId, newName, newAge) => {
-    try {
-      // First, update the UI optimistically
-      const updatedPets = pets.map((pet) =>
-        pet._id === petId ? { ...pet, petName: newName, petAge: Number.parseInt(newAge, 10) } : pet,
-      )
-      setPets(updatedPets)
-
-      // If this pet was selected, update the selected pet too
-      if (selectedPet && selectedPet.petName === petToEdit?.petName) {
-        setSelectedPet({ petName: newName, petAge: Number.parseInt(newAge, 10) })
+      const email = session?.user?.email
+      if (!email) {
+        setMessage("User email not found")
+        return
       }
 
-      // Then make the API call
-      const response = await axios.put("/api/user/pet", {
-        petId,
-        petName: newName,
-        petAge: Number.parseInt(newAge, 10),
-        userEmail: session.user.email,
-      })
+      const res = await axios.get(`https://site.petowk.com/wp-json/pet-info/v1/get?email=${email}`)
+      if (res.data && res.data.pets) {
+        // Transform the API response to match the expected format
+        const transformedPets = res.data.pets.map((pet, index) => ({
+          _id: `pet-${index}`,
+          petName: pet.pet_type,
+          petAge: pet.pet_age,
+        }))
+        setPets(transformedPets)
 
-      console.log("Update response:", response.data)
-      setMessage("Pet updated successfully.")
-
-      // Refresh the pet list to ensure we have the latest data
-      await fetchPetInfo()
-      return response.data
+        // Log pet data to Supabase
+        await logToSupabase("pet_fetch", {
+          source: "api",
+          pets: res.data.pets,
+          transformed_pets: transformedPets,
+        })
+      } else {
+        setMessage("No pets found")
+        await logToSupabase("pet_fetch_error", {
+          message: "No pets found",
+          response: res.data,
+        })
+      }
     } catch (error) {
-      console.error("Update error:", error)
-      setMessage(`Error: ${error.response?.data?.error || error.message}`)
-      // If there was an error, refresh the pet list to revert any optimistic updates
-      await fetchPetInfo()
-      throw error
+      setMessage(`Error fetching pets: ${error.response?.data?.error || error.message}`)
+      await logToSupabase("pet_fetch_error", {
+        message: error.message,
+        response: error.response?.data,
+      })
     }
   }
 
   const handlePetClick = (petName, petAge) => {
     localStorage.setItem("selectedPet", JSON.stringify({ petName, petAge }))
     setSelectedPet({ petName, petAge })
-  }
 
-  // 4. Add a function to handle opening the edit modal
-  // Add this function after the handlePetClick function
-
-  const handleEditPet = (pet) => {
-    setPetToEdit({ ...pet }) // Make a copy to avoid reference issues
-    setIsEditModalOpen(true)
+    // Log pet selection to Supabase
+    logToSupabase("pet_selected", { petName, petAge })
   }
 
   const handleChatSubmit = async (e) => {
@@ -373,6 +237,13 @@ export default function Dashboard() {
     setIsLoading(true)
     const newMessage = { role: "user", content: inputValue }
     setChatMessages((prev) => [...prev, newMessage])
+
+    // Log user message to Supabase
+    await logToSupabase("chat_message_user", {
+      message: inputValue,
+      pet: selectedPet,
+      query_type: queryType,
+    })
 
     console.log("Sending request to API...")
     const startTime = Date.now()
@@ -391,19 +262,43 @@ export default function Dashboard() {
 
       console.log("API response received", response.data)
       setChatMessages((prev) => [...prev, { role: "assistant", content: response.data.suggestion }])
+
+      // Log AI response to Supabase
+      const endTime = Date.now()
+      await logToSupabase("chat_message_ai", {
+        request: {
+          pet: selectedPet.petName,
+          query_type: queryType,
+          message: inputValue,
+        },
+        response: response.data,
+        response_time_ms: endTime - startTime,
+      })
     } catch (error) {
       console.error("Error:", error)
+      let errorMessage = "Sorry, I encountered an error. Please try again."
+
       if (axios.isAxiosError(error) && error.code === "ECONNABORTED") {
-        setChatMessages((prev) => [
-          ...prev,
-          { role: "assistant", content: "Sorry, the request timed out. Please try again." },
-        ])
-      } else {
-        setChatMessages((prev) => [
-          ...prev,
-          { role: "assistant", content: "Sorry, I encountered an error. Please try again." },
-        ])
+        errorMessage = "Sorry, the request timed out. Please try again."
       }
+
+      setChatMessages((prev) => [...prev, { role: "assistant", content: errorMessage }])
+
+      // Log error to Supabase
+      const endTime = Date.now()
+      await logToSupabase("chat_error", {
+        request: {
+          pet: selectedPet.petName,
+          query_type: queryType,
+          message: inputValue,
+        },
+        error: {
+          message: error.message,
+          code: error.code,
+          response: error.response?.data,
+        },
+        response_time_ms: endTime - startTime,
+      })
     } finally {
       const endTime = Date.now()
       console.log(`Request took ${endTime - startTime}ms`)
@@ -607,12 +502,11 @@ export default function Dashboard() {
         <ScrollArea className="flex-grow">
           <div className="p-2 space-y-2">
             <div className="flex items-center gap-3 bg-white p-4 rounded-xl shadow-sm">
-            <div className="flex items-center space-x-2">
-  <div className="flex items-center justify-center h-10 w-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-white font-bold shadow-md border-2 border-[#222]">
-  {session?.user?.name?.slice(0, 2).toUpperCase() || "US"}
-  </div>
-</div>
-
+              <div className="flex items-center space-x-2">
+                <div className="flex items-center justify-center h-10 w-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-white font-bold shadow-md border-2 border-[#222]">
+                  {session?.user?.name?.slice(0, 2).toUpperCase() || "US"}
+                </div>
+              </div>
 
               <div>
                 <div className="text-sm text-black">Welcome,</div>
@@ -627,13 +521,14 @@ export default function Dashboard() {
                   {pets.map((pet) => (
                     <div
                       key={pet._id}
-                      className={`flex items-center justify-between p-3 rounded-xl border ${
+                      className={`flex items-center p-3 rounded-xl border ${
                         selectedPet && selectedPet.petName === pet.petName
                           ? "bg-[#E6DEEE] border-gray-300 shadow-sm"
                           : "bg-white border-gray-200"
-                      } transition-all duration-200 ease-in-out hover:shadow-sm`}
+                      } transition-all duration-200 ease-in-out hover:shadow-sm cursor-pointer`}
+                      onClick={() => handlePetClick(pet.petName, pet.petAge)}
                     >
-                      <div className="cursor-pointer flex-grow" onClick={() => handlePetClick(pet.petName, pet.petAge)}>
+                      <div className="flex-grow">
                         <div
                           className={`font-medium ${
                             selectedPet && selectedPet.petName === pet.petName ? "text-black" : "text-black"
@@ -643,70 +538,6 @@ export default function Dashboard() {
                         </div>
                         <div className="text-sm text-black">{`Age: ${pet.petAge} months`}</div>
                       </div>
-                      <div className="flex items-center space-x-2">
-                        <TooltipProvider delayDuration={300}>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="text-black hover:text-black hover:bg-indigo-100"
-                                onClick={() => handleEditPet(pet)}
-                              >
-                                <Settings className="h-4 w-4" />
-                              </Button>
-                            </TooltipTrigger>
-                            <TooltipContent
-                              side="right"
-                              className="bg-[#F6F0F0] text-black border-none rounded-lg px-3 py-1.5 text-sm font-medium shadow-lg"
-                            >
-                              <p>Edit Pet</p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                        <AlertDialog>
-                          <TooltipProvider delayDuration={300}>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <AlertDialogTrigger asChild>
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="text-black hover:text-black hover:bg-indigo-100"
-                                  >
-                                    <Trash2 className="h-4 w-4" />
-                                  </Button>
-                                </AlertDialogTrigger>
-                              </TooltipTrigger>
-                              <TooltipContent
-                                side="right"
-                                className="bg-[#F6F0F0] text-black border-none rounded-lg px-3 py-1.5 text-sm font-medium shadow-lg"
-                              >
-                                <p>Delete Pet</p>
-                              </TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
-                          <AlertDialogContent className="bg-white">
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                              <AlertDialogDescription className="text-black">
-                                This action cannot be undone. This will permanently delete your pet's data.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel className="bg-indigo-100 text-black hover:bg-indigo-200 rounded-xl">
-                                Cancel
-                              </AlertDialogCancel>
-                              <AlertDialogAction
-                                className="bg-[#f90000] text-white hover:bg-red-700 rounded-xl"
-                                onClick={() => deletePet(pet._id)}
-                              >
-                                Delete
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                      </div>
                     </div>
                   ))}
                 </div>
@@ -715,46 +546,6 @@ export default function Dashboard() {
               )}
             </div>
 
-            <div className="space-y-4 bg-white p-4 rounded-xl shadow-sm">
-              <div>
-                <h4 className="text-xl font-semibold text-gray-800">Add a New Pet</h4>
-                <p className="text-sm text-gray-500">e.g., Dog, Cat, Parrot, etc.</p>
-              </div>
-
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault()
-                  savePetInfo(petName, petAge)
-                }}
-                className="space-y-4"
-              >
-                <Input
-                  placeholder="Pet Type"
-                  value={petName}
-                  onChange={(e) => setPetName(e.target.value)}
-                  className="bg-gray-50 border-gray-300 text-gray-800 placeholder-gray-400 rounded-xl shadow-sm focus:ring-2 focus:ring-gray-400 focus:border-transparent"
-                  required
-                />
-                <Input
-                  placeholder="Pet Age (in months)"
-                  type="number"
-                  value={petAge}
-                  onChange={(e) => setPetAge(e.target.value)}
-                  className="bg-gray-50 border-gray-300 text-gray-800 placeholder-gray-400 rounded-xl shadow-sm focus:ring-2 focus:ring-gray-400 focus:border-transparent"
-                  required
-                />
-                <Button
-                  type="submit"
-                  variant="outline"
-                  className="w-full justify-start gap-2 border-gray-300 text-gray-800 hover:bg-gray-100 rounded-xl shadow-sm"
-                >
-                  <Plus className="h-4 w-4" />
-                  Add Pet
-                </Button>
-              </form>
-
-              {message && <p className="text-gray-600 text-sm mt-2">{message}</p>}
-            </div>
             <div className="space-y-4 bg-white p-4 rounded-xl shadow-sm">
               <h4 className="text-lg font-semibold text-gray-800">Select AI Model</h4>
               <Select>
@@ -825,16 +616,14 @@ export default function Dashboard() {
                             {pets.map((pet) => (
                               <div
                                 key={pet._id}
-                                className={`flex items-center justify-between p-3 rounded-xl border ${
+                                className={`flex items-center p-3 rounded-xl border ${
                                   selectedPet && selectedPet.petName === pet.petName
                                     ? "bg-gray-100 border-gray-300 shadow-sm"
                                     : "bg-white border-gray-200"
-                                } transition-all duration-200 ease-in-out hover:shadow-sm`}
+                                } transition-all duration-200 ease-in-out hover:shadow-sm cursor-pointer`}
+                                onClick={() => handlePetClick(pet.petName, pet.petAge)}
                               >
-                                <div
-                                  className="cursor-pointer flex-grow"
-                                  onClick={() => handlePetClick(pet.petName, pet.petAge)}
-                                >
+                                <div className="flex-grow">
                                   <div
                                     className={`font-medium ${
                                       selectedPet && selectedPet.petName === pet.petName ? "text-black" : "text-black"
@@ -844,70 +633,6 @@ export default function Dashboard() {
                                   </div>
                                   <div className="text-sm text-black">{`Age: ${pet.petAge} months`}</div>
                                 </div>
-                                <div className="flex items-center space-x-2">
-                                  <TooltipProvider delayDuration={300}>
-                                    <Tooltip>
-                                      <TooltipTrigger asChild>
-                                        <Button
-                                          variant="ghost"
-                                          size="icon"
-                                          className="text-black hover:text-black hover:bg-indigo-100"
-                                          onClick={() => handleEditPet(pet)}
-                                        >
-                                          <Settings className="h-4 w-4" />
-                                        </Button>
-                                      </TooltipTrigger>
-                                      <TooltipContent
-                                        side="right"
-                                        className="bg-[#F6F0F0] text-black border-none rounded-lg px-3 py-1.5 text-sm font-medium shadow-lg"
-                                      >
-                                        <p>Edit Pet</p>
-                                      </TooltipContent>
-                                    </Tooltip>
-                                  </TooltipProvider>
-                                  <AlertDialog>
-                                    <TooltipProvider delayDuration={300}>
-                                      <Tooltip>
-                                        <TooltipTrigger asChild>
-                                          <AlertDialogTrigger asChild>
-                                            <Button
-                                              variant="ghost"
-                                              size="icon"
-                                              className="text-black hover:text-black hover:bg-indigo-100"
-                                            >
-                                              <Trash2 className="h-4 w-4" />
-                                            </Button>
-                                          </AlertDialogTrigger>
-                                        </TooltipTrigger>
-                                        <TooltipContent
-                                          side="right"
-                                          className="bg-[#F6F0F0] text-black border-none rounded-lg px-3 py-1.5 text-sm font-medium shadow-lg"
-                                        >
-                                          <p>Delete Pet</p>
-                                        </TooltipContent>
-                                      </Tooltip>
-                                    </TooltipProvider>
-                                    <AlertDialogContent className="bg-white">
-                                      <AlertDialogHeader>
-                                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                                        <AlertDialogDescription className="text-black">
-                                          This action cannot be undone. This will permanently delete your pet's data.
-                                        </AlertDialogDescription>
-                                      </AlertDialogHeader>
-                                      <AlertDialogFooter>
-                                        <AlertDialogCancel className="bg-indigo-100 text-black hover:bg-indigo-200 rounded-xl">
-                                          Cancel
-                                        </AlertDialogCancel>
-                                        <AlertDialogAction
-                                          className="bg-[#f90000] text-white hover:bg-red-700 rounded-xl"
-                                          onClick={() => deletePet(pet._id)}
-                                        >
-                                          Delete
-                                        </AlertDialogAction>
-                                      </AlertDialogFooter>
-                                    </AlertDialogContent>
-                                  </AlertDialog>
-                                </div>
                               </div>
                             ))}
                           </div>
@@ -915,46 +640,6 @@ export default function Dashboard() {
                           <p className="text-black text-sm">No pets added yet.</p>
                         )}
                       </div>
-                    </div>
-
-                    <div className="space-y-4 bg-white p-4 rounded-xl shadow-sm">
-                      <div>
-                        <h4 className="text-xl font-semibold text-gray-800">Add a New Pet</h4>
-                        <p className="text-sm text-gray-500">e.g., Dog, Cat, Parrot, etc.</p>
-                      </div>
-
-                      <form
-                        onSubmit={(e) => {
-                          e.preventDefault()
-                          savePetInfo(petName, petAge)
-                        }}
-                        className="space-y-4"
-                      >
-                        <Input
-                          placeholder="Pet Type"
-                          value={petName}
-                          onChange={(e) => setPetName(e.target.value)}
-                          className="bg-gray-50 border-gray-300 text-gray-800 placeholder-gray-400 rounded-xl shadow-sm focus:ring-2 focus:ring-gray-400 focus:border-transparent"
-                          required
-                        />
-                        <Input
-                          placeholder="Pet Age (in months)"
-                          type="number"
-                          value={petAge}
-                          onChange={(e) => setPetAge(e.target.value)}
-                          className="bg-gray-50 border-gray-300 text-gray-800 placeholder-gray-400 rounded-xl shadow-sm focus:ring-2 focus:ring-gray-400 focus:border-transparent"
-                          required
-                        />
-                        <Button
-                          type="submit"
-                          variant="outline"
-                          className="w-full justify-start gap-2 border-gray-300 text-gray-800 hover:bg-gray-100 rounded-xl shadow-sm"
-                        >
-                          <Plus className="h-4 w-4" />
-                          Add Pet
-                        </Button>
-                      </form>
-                      {message && <p className="text-gray-600 text-sm mt-2">{message}</p>}
                     </div>
                     <div className="space-y-4 bg-white p-4 rounded-xl shadow-sm">
                       <h4 className="text-lg font-semibold text-gray-800">Select AI Model</h4>
@@ -1067,12 +752,11 @@ export default function Dashboard() {
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-                    <div className="flex items-center space-x-2">
-  <div className="flex items-center justify-center h-10 w-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-white font-bold shadow-md border-2 border-[#222]">
-    {session?.user?.name?.slice(0, 2).toUpperCase() || "US"}
-  </div>
-</div>
-
+                      <div className="flex items-center space-x-2">
+                        <div className="flex items-center justify-center h-10 w-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-white font-bold shadow-md border-2 border-[#222]">
+                          {session?.user?.name?.slice(0, 2).toUpperCase() || "US"}
+                        </div>
+                      </div>
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent
@@ -1189,17 +873,15 @@ export default function Dashboard() {
                         onClick={() => setIsDetailSidebarOpen(true)}
                         className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-md text-lg py-2 px-6 rounded-xl transition duration-300 ease-in-out"
                       >
-                        Select a Pet
+                        View Your Pets
                       </Button>
                     ) : (
-                      <CreatePetModal
-                        onSave={savePetInfo}
-                        trigger={
-                          <Button className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-md text-lg py-2 px-6 rounded-xl transition duration-300 ease-in-out">
-                            Add Your First Pet
-                          </Button>
-                        }
-                      />
+                      <Button
+                        onClick={() => setIsDetailSidebarOpen(true)}
+                        className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-md text-lg py-2 px-6 rounded-xl transition duration-300 ease-in-out"
+                      >
+                        View Your Pets
+                      </Button>
                     )}
                   </div>
                 )}
@@ -1262,14 +944,7 @@ export default function Dashboard() {
           </div>
         </div>
       </main>
-      {petToEdit && (
-        <EditPetModal
-          isOpen={isEditModalOpen}
-          onClose={() => setIsEditModalOpen(false)}
-          pet={petToEdit}
-          onSave={updatePet}
-        />
-      )}
     </div>
   )
 }
+

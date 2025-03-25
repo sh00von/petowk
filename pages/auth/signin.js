@@ -1,27 +1,27 @@
-import { getProviders, signIn } from 'next-auth/react';
-import Head from 'next/head';
+import { signIn, signOut, useSession } from "next-auth/react";
 
-export default function SignIn({ providers }) {
-  return (
-    <>
-      <Head>
-        <title>Sign In</title>
-      </Head>
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="w-96 p-6 bg-white rounded-lg shadow-lg">
-          <h2 className="text-2xl font-bold mb-6 text-center">Sign In</h2>
-          {Object.values(providers).map((provider) => (
-            <button key={provider.name} onClick={() => signIn(provider.id)}>
-              Sign in with {provider.name}
-            </button>
-          ))}
-        </div>
+export default function Login() {
+  const { data: session, status } = useSession();
+
+  if (status === "loading") return <p>Loading...</p>;
+
+  if (session) {
+    return (
+      <div>
+        <h1>Welcome, {session.user.name}</h1>
+        <p>Email: {session.user.email}</p>
+        <button onClick={() => signOut()}>Sign Out</button>
       </div>
-    </>
+    );
+  }
+
+  return (
+    <div>
+      <h1>Login</h1>
+      <button onClick={() => signIn("miniorange")}>
+        Sign in with WordPress
+      </button>
+    </div>
   );
 }
 
-export async function getServerSideProps() {
-  const providers = await getProviders();
-  return { props: { providers } };
-}
