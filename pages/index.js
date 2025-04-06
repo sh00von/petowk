@@ -1,46 +1,25 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useSession, signIn } from "next-auth/react"
-import { useRouter } from "next/navigation"
-import Head from "next/head"
-import { Button } from "../components/ui/button"
-import { Input } from "../components/ui/input"
+import { useSession, signIn } from "next-auth/react";
+import { useRouter } from "next/router";
+import Head from "next/head";
+import { Button } from "../components/ui/button";
 
-import Hero from "../components/Hero"
-import Header from "../components/Header"
-import Footer from "../components/Footer"
+import Hero from "../components/Hero";
+import Header from "../components/Header";
+import Footer from "../components/Footer";
 
 export default function Home() {
-  const { data: session } = useSession()
-  const router = useRouter()
-  const [email, setEmail] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
+  const { data: session } = useSession();
+  const router = useRouter();
 
-  // Removed the useEffect that redirects to dashboard
-
-  const handleEmailSignIn = async (e) => {
-    e.preventDefault()
-    setIsLoading(true)
+  const handlePetowkLogin = async () => {
     try {
-      await signIn("email", { email, callbackUrl: "/dashboard" })
+      await signIn("petowk", { callbackUrl: "/dashboard" });
     } catch (error) {
-      console.error("Sign-in failed:", error)
-    } finally {
-      setIsLoading(false)
+      console.error("Petowk sign in failed:", error);
     }
-  }
-
-  const handleGoogleLogin = async () => {
-    setIsLoading(true)
-    try {
-      await signIn("google", { callbackUrl: "/dashboard" })
-    } catch (error) {
-      console.error("Google Login failed:", error)
-    } finally {
-      setIsLoading(false)
-    }
-  }
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-white font-sans">
@@ -51,38 +30,44 @@ export default function Home() {
       <main className="flex-grow pt-24">
         <Hero />
         {!session ? (
-          <section className="max-w-md mx-auto mt-8 p-6 border rounded-lg shadow-lg">
-            <h2 className="text-2xl font-bold mb-6 text-center">Sign Up</h2>
-            <form onSubmit={handleEmailSignIn} className="space-y-4">
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium mb-1">
-                  Enter your email
-                </label>
-                <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-              </div>
-              <Button type="submit" className="w-full bg-red-600" disabled={isLoading}>
-                {isLoading ? "Sending..." : "Sign Up with Email"}
-              </Button>
-            </form>
-            <div className="mt-4 text-center">
-              <p className="text-sm">Or</p>
-              <Button onClick={handleGoogleLogin} className="w-full bg-blue-600" disabled={isLoading}>
-                {isLoading ? "Logging in..." : "Login with Google"}
-              </Button>
-            </div>
-          </section>
-        ) : (
-          <section className="max-w-md mx-auto mt-8 p-6 border rounded-lg shadow-lg text-center">
-            <h2 className="text-2xl font-bold mb-4">Welcome back, {session.user?.name || "User"}!</h2>
-            <p className="mb-6">You're already signed in.</p>
-            <Button onClick={() => router.push("/dashboard")} className="bg-indigo-600 hover:bg-indigo-700">
-              Go to Dashboard
+        <section className="max-w-md mx-auto mt-8 p-8 border border-gray-200 rounded-2xl shadow-lg bg-white">
+          <p className="text-center text-gray-600 mb-6">Sign in to access your personalized pet care dashboard</p>
+
+          <div className="space-y-4">
+            <Button
+              onClick={handlePetowkLogin}
+              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-6 rounded-xl shadow-md transition duration-300 ease-in-out transform hover:scale-[1.02] flex items-center justify-center"
+            >
+              <span className="text-lg font-medium">Sign in with PETOWK</span>
             </Button>
-          </section>
-        )}
+
+            <div className="text-center mt-6 pt-4 border-t border-gray-200">
+              <p className="text-gray-600 mb-2">Don't have an account?</p>
+              <a
+                href="https://site.petowk.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-indigo-600 hover:text-indigo-800 font-medium transition-colors duration-200"
+              >
+                Create an account on PETOWK
+              </a>
+            </div>
+          </div>
+        </section>
+      ) : (
+        <section className="max-w-md mx-auto mt-8 p-8 border border-gray-200 rounded-2xl shadow-lg bg-white text-center">
+          <h2 className="text-2xl font-bold mb-4 text-gray-800">Welcome back, {session.user?.name || "User"}!</h2>
+          <p className="mb-6 text-gray-600">You're already signed in to your PETOWK account.</p>
+          <Button
+            onClick={() => router.push("/dashboard")}
+            className="bg-indigo-600 hover:bg-indigo-700 text-white py-6 px-8 rounded-xl shadow-md transition duration-300 ease-in-out transform hover:scale-[1.02]"
+          >
+            <span className="text-lg font-medium">Go to Dashboard</span>
+          </Button>
+        </section>
+      )}
       </main>
       <Footer />
     </div>
-  )
+  );
 }
-

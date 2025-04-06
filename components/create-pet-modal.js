@@ -30,11 +30,11 @@ function CreatePetModal(props) {
         {trigger || <Button>Create Pet</Button>}
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px] bg-white rounded-xl shadow-lg p-6">
-        <DialogHeader><div>
-  <h4 className="text-xl font-semibold text-gray-800">Add a New Pet</h4>
-  <p className="text-sm text-gray-500">e.g., Dog, Cat, Parrot, etc.</p>
-</div>
-
+        <DialogHeader>
+          <div>
+            <h4 className="text-xl font-semibold text-gray-800">Add a New Pet</h4>
+            <p className="text-sm text-gray-500">e.g., Dog, Cat, Parrot, etc.</p>
+          </div>
         </DialogHeader>
         <div className="grid gap-6 py-4">
           <div className="grid grid-cols-1 items-center gap-4">

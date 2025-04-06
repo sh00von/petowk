@@ -14,22 +14,10 @@ export default function LoginPage() {
   }, [status, router]);
 
   return (
-    <div style={{ 
-      display: "flex", 
-      flexDirection: "column", 
-      alignItems: "center", 
-      justifyContent: "center", 
-      height: "100vh" 
-    }}>
+    <div >
       <h1>Login</h1>
       <button 
-        onClick={() => signIn("petowk")} 
-        style={{
-          padding: "10px 20px",
-          fontSize: "16px",
-          cursor: "pointer",
-          marginTop: "20px"
-        }}
+        onClick={() => signIn("petowk")}
       >
         Sign in with petowk
       </button>

@@ -56,6 +56,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "../../components/ui/alert-dialog"
+import CreatePetModal from "../../components/create-pet-modal"
 
 import { useRouter } from "next/router"
 import { createClient } from "@supabase/supabase-js"
@@ -203,6 +204,7 @@ export default function Dashboard() {
 
   // 1. Add the isEditModalOpen state
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
 
   const logToSupabase = async (logType, data) => {
     try {
@@ -1133,7 +1135,7 @@ export default function Dashboard() {
                     <div className="bg-white p-4 rounded-2xl shadow-sm">
                       <h3 className="text-lg font-semibold text-black mb-4">Account Settings</h3>
                       <div className="space-y-2">
-                        <Link href="/profile">
+                        <Link href="https://site.petowk.com/user/" target="_blank" rel="noopener">
                           <Button variant="ghost" className="w-full justify-start text-black hover:bg-violet-100">
                             <User className="mr-2 h-4 w-4" />
                             Profile
@@ -1151,27 +1153,6 @@ export default function Dashboard() {
                     </div>
                   </TabsContent>
                   {/* Add the "Add a New Pet" form to the mobile sidebar */}
-                  <TabsContent value="account" className="space-y-4">
-                    <div className="bg-white p-4 rounded-2xl shadow-sm">
-                      <h3 className="text-lg font-semibold text-black mb-4">Account Settings</h3>
-                      <div className="space-y-2">
-                        <Link href="/profile">
-                          <Button variant="ghost" className="w-full justify-start text-black hover:bg-violet-100">
-                            <User className="mr-2 h-4 w-4" />
-                            Profile
-                          </Button>
-                        </Link>
-                        <Button
-                          variant="ghost"
-                          onClick={() => signOut({ callbackUrl: "/" })}
-                          className="w-full justify-start text-black hover:bg-violet-100"
-                        >
-                          <LogOut className="mr-2 h-4 w-4" />
-                          Log out
-                        </Button>
-                      </div>
-                    </div>
-                  </TabsContent>
                   <div className="space-y-4 bg-white p-4 rounded-xl shadow-sm">
                     <div>
                       <h4 className="text-xl font-semibold text-gray-800">Add a New Pet</h4>
@@ -1256,7 +1237,7 @@ export default function Dashboard() {
                     align="end"
                     className="w-56 bg-white shadow-lg rounded-xl border border-gray-200"
                   >
-                    <Link href="/profile">
+                    <Link href="https://site.petowk.com/user/" target="_blank" rel="noopener">
                       <DropdownMenuItem className="hover:bg-gray-100 rounded-xl">
                         <User className="mr-2 h-4 w-4" />
                         <span>Profile</span>
@@ -1369,15 +1350,14 @@ export default function Dashboard() {
                         Select a Pet
                       </Button>
                     ) : (
-                      <Button
-                        onClick={() => {
-                          setIsDetailSidebarOpen(true)
-                          document.getElementById("add-pet-form")?.scrollIntoView({ behavior: "smooth" })
-                        }}
-                        className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-md text-lg py-2 px-6 rounded-xl transition duration-300 ease-in-out"
-                      >
-                        Add Your First Pet
-                      </Button>
+                      <CreatePetModal
+                        onSave={savePetInfo}
+                        trigger={
+                          <Button className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-md text-lg py-2 px-6 rounded-xl transition duration-300 ease-in-out">
+                            Add Your First Pet
+                          </Button>
+                        }
+                      />
                     )}
                   </div>
                 )}
