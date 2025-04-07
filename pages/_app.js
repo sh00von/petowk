@@ -10,7 +10,7 @@ function SessionRedirector({ children }) {
   const router = useRouter();
 
   useEffect(() => {
-    if (status === 'authenticated' && router.pathname === '/') {
+    if (status === 'authenticated' && router.pathname === '/dashboard') {
       router.push('/dashboard');
     }
   }, [status, router]);

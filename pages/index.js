@@ -1,73 +1,86 @@
-"use client";
-
-import { useSession, signIn } from "next-auth/react";
+"use client"
+import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/router";
+import { useEffect } from "react";
 import Head from "next/head";
 import { Button } from "../components/ui/button";
+import { Helmet } from "react-helmet";
+import { Loader2 } from 'lucide-react';
 
-import Hero from "../components/Hero";
-import Header from "../components/Header";
-import Footer from "../components/Footer";
-
-export default function Home() {
-  const { data: session } = useSession();
+export default function LoginPage() {
+  const { data: session, status } = useSession();
   const router = useRouter();
 
-  const handlePetowkLogin = async () => {
-    try {
-      await signIn("petowk", { callbackUrl: "/dashboard" });
-    } catch (error) {
-      console.error("Petowk sign in failed:", error);
+  // If the user is already authenticated, redirect them to the dashboard
+  useEffect(() => {
+    if (status === "authenticated") {
+      router.push("/dashboard");
     }
-  };
+  }, [status, router]);
+
+  if (status === "loading") {
+    return (
+      <div className="flex items-center justify-center h-screen bg-gray-100">
+        <Loader2 className="h-12 w-12 animate-spin text-blue-500" />
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen flex flex-col bg-white font-sans">
+    <div className="flex min-h-screen flex-col bg-gray-100">
       <Head>
-        <title>PETOWK - AI-powered pet care assistant</title>
+        <title>PETOWK - Login</title>
       </Head>
-      <Header />
-      <main className="flex-grow pt-24">
-        <Hero />
-        {!session ? (
-        <section className="max-w-md mx-auto mt-8 p-8 border border-gray-200 rounded-2xl shadow-lg bg-white">
-          <p className="text-center text-gray-600 mb-6">Sign in to access your personalized pet care dashboard</p>
+      <Helmet>
+        <style>
+          {`
+            @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+            body {
+              font-family: 'Inter', sans-serif;
+            }
+          `}
+        </style>
+      </Helmet>
+
+      <main className="flex flex-1 items-center justify-center p-6">
+        <div className="w-full max-w-md space-y-8 bg-white p-8 rounded-2xl shadow-lg">
+          <div className="text-center">
+            <div className="flex justify-center mb-6">
+              <img 
+                src="./logo.png" 
+                alt="PETOWK" 
+                className="h-16 w-32 object-contain"
+              />
+            </div>
+            <h1 className="text-3xl font-bold text-gray-800 mb-2">Welcome to PETOWK</h1>
+            <p className="text-gray-600 mb-8">AI-powered pet care assistant</p>
+          </div>
 
           <div className="space-y-4">
-            <Button
-              onClick={handlePetowkLogin}
-              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-6 rounded-xl shadow-md transition duration-300 ease-in-out transform hover:scale-[1.02] flex items-center justify-center"
-            >
-              <span className="text-lg font-medium">Sign in with PETOWK</span>
+          <Button
+  onClick={async () => {
+    const result = await signIn("petowk", { callbackUrl: "/dashboard" })
+    if (!result?.ok) {
+      console.error("Sign in failed or was canceled", result)
+    }
+  }}
+  className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl shadow-md transition duration-300 ease-in-out text-lg"
+>
+              Sign in with PETOWK
             </Button>
-
-            <div className="text-center mt-6 pt-4 border-t border-gray-200">
-              <p className="text-gray-600 mb-2">Don't have an account?</p>
-              <a
-                href="https://site.petowk.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-indigo-600 hover:text-indigo-800 font-medium transition-colors duration-200"
-              >
-                Create an account on PETOWK
-              </a>
+            
+            <div className="text-center text-sm text-gray-600 mt-6">
+              <p>By signing in, you agree to our Terms of Service and Privacy Policy.</p>
             </div>
           </div>
-        </section>
-      ) : (
-        <section className="max-w-md mx-auto mt-8 p-8 border border-gray-200 rounded-2xl shadow-lg bg-white text-center">
-          <h2 className="text-2xl font-bold mb-4 text-gray-800">Welcome back, {session.user?.name || "User"}!</h2>
-          <p className="mb-6 text-gray-600">You're already signed in to your PETOWK account.</p>
-          <Button
-            onClick={() => router.push("/dashboard")}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white py-6 px-8 rounded-xl shadow-md transition duration-300 ease-in-out transform hover:scale-[1.02]"
-          >
-            <span className="text-lg font-medium">Go to Dashboard</span>
-          </Button>
-        </section>
-      )}
+        </div>
       </main>
-      <Footer />
+
+      <footer className="bg-white py-6 border-t border-gray-200">
+        <div className="container mx-auto px-4 text-center text-gray-600 text-sm">
+          <p>© {new Date().getFullYear()} PETOWK. All rights reserved.</p>
+        </div>
+      </footer>
     </div>
   );
 }

@@ -752,7 +752,10 @@ export default function Dashboard() {
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
-                  onClick={() => signOut({ callbackUrl: "/" })}
+                  onClick={(e) => {
+                    e.preventDefault()
+                    signOut({ callbackUrl: "/" })
+                  }}
                   variant="ghost"
                   size="icon"
                   className="text-gray-600 hover:bg-indigo-100 hover:text-indigo-600 transition-colors duration-200"
@@ -1143,7 +1146,10 @@ export default function Dashboard() {
                         </Link>
                         <Button
                           variant="ghost"
-                          onClick={() => signOut({ callbackUrl: "/" })}
+                          onClick={(e) => {
+                            e.preventDefault()
+                            signOut({ callbackUrl: "/" })
+                          }}
                           className="w-full justify-start text-black hover:bg-violet-100"
                         >
                           <LogOut className="mr-2 h-4 w-4" />
@@ -1245,7 +1251,10 @@ export default function Dashboard() {
                     </Link>
                     <DropdownMenuItem
                       className="hover:bg-gray-100 rounded-xl"
-                      onClick={() => signOut({ callbackUrl: "/" })}
+                      onClick={(e) => {
+                        e.preventDefault()
+                        signOut({ callbackUrl: "/" })
+                      }}
                     >
                       <LogOut className="mr-2 h-4 w-4" />
                       <span>Log out</span>
