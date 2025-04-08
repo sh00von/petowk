@@ -1272,18 +1272,20 @@ export default function Dashboard() {
               <TooltipProvider delayDuration={300}>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Button
-                      onClick={scrollToTop}
-                      className="fixed bottom-24 right-6 z-50 bg-[#f90000] hover:bg-red-700 text-white rounded-full shadow-lg p-4 transition-all duration-300 ease-in-out opacity-90 hover:opacity-100"
-                      size="icon"
-                      aria-label="Scroll to top"
-                    >
-                      <ArrowUp className="h-6 w-6 text-white" />
-                    </Button>
+                  <Button
+    onClick={scrollToTop}
+    className="fixed bottom-24 right-6 z-50 bg-[#f90000] hover:bg-red-700 text-white rounded-full shadow-lg p-4 transition-all duration-300 ease-in-out opacity-90 hover:opacity-100"
+    size="icon"
+    aria-label="Scroll to top"
+>
+<ArrowUp className="h-6 w-6" stroke="white" />
+
+</Button>
+
                   </TooltipTrigger>
                   <TooltipContent
                     side="right"
-                    className="bg-[#F6F0F0] text-black border-none rounded-lg px-3 py-1.5 text-sm font-medium shadow-lg"
+                    className="bg-[#ffffff] text-black border-none rounded-lg px-3 py-1.5 text-sm font-medium shadow-lg"
                     sideOffset={5}
                   >
                     <p>Back to Top</p>
