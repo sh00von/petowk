@@ -15,10 +15,10 @@ export default NextAuth({
       userinfoUrl: "https://site.petowk.com/wp-json/moserver/resource",
       // Use the provided discovery endpoint if needed or remove if not used.
       wellKnown:
-        "https://site.petowk.com/wp-json/moserver/xEornGFiPaxnDEyoWEBTjLHhoypKJCDo/.well-known/openid-configuration",
-        issuer:"https://site.petowk.com/wp-json/moserver/xEornGFiPaxnDEyoWEBTjLHhoypKJCDo",
-      clientId: "xEornGFiPaxnDEyoWEBTjLHhoypKJCDo",
-      clientSecret: "DGfTofPAjkvwCGSknbJPEQWQZZkoARlD",
+        "https://site.petowk.com/wp-json/moserver/sgPACOmJGkZrmjqPxoECZeJPYtHFVqaT/.well-known/openid-configuration",
+        issuer:"https://site.petowk.com/wp-json/moserver/sgPACOmJGkZrmjqPxoECZeJPYtHFVqaT",
+      clientId: "sgPACOmJGkZrmjqPxoECZeJPYtHFVqaT",
+      clientSecret: "WhHNFVJzFcCVMMEsQtipFrQxZuhSrYKn",
       async profile(profile, tokens) {
         return {
           id: profile.id || profile.sub,

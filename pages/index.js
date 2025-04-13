@@ -1,17 +1,17 @@
 "use client"
 import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Head from "next/head";
 import { Button } from "../components/ui/button";
 import { Helmet } from "react-helmet";
-import { Loader2 } from 'lucide-react';
+import { Loader2 } from "lucide-react";
 
 export default function LoginPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const [loading, setLoading] = useState(false); // NEW
 
-  // If the user is already authenticated, redirect them to the dashboard
   useEffect(() => {
     if (status === "authenticated") {
       router.push("/dashboard");
@@ -57,18 +57,22 @@ export default function LoginPage() {
           </div>
 
           <div className="space-y-4">
-          <Button
-  onClick={async () => {
-    const result = await signIn("petowk", { callbackUrl: "/dashboard" })
-    if (!result?.ok) {
-      console.error("Sign in failed or was canceled", result)
-    }
-  }}
-  className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl shadow-md transition duration-300 ease-in-out text-lg"
->
-              Sign in with PETOWK
+            <Button
+              onClick={async () => {
+                setLoading(true);
+                const result = await signIn("petowk", { callbackUrl: "/dashboard" });
+                if (!result?.ok) {
+                  setLoading(false);
+                  console.error("Sign in failed or was canceled", result);
+                }
+              }}
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl shadow-md transition duration-300 ease-in-out text-lg flex items-center justify-center gap-2"
+              disabled={loading}
+            >
+              {loading && <Loader2 className="h-5 w-5 animate-spin" />}
+              {loading ? "Signing in..." : "Sign in with PETOWK"}
             </Button>
-            
+
             <div className="text-center text-sm text-gray-600 mt-6">
               <p>By signing in, you agree to our Terms of Service and Privacy Policy.</p>
             </div>
