@@ -21,12 +21,6 @@ import {
 import { Button } from "../../components/ui/button"
 import { Input } from "../../components/ui/input"
 import Head from "next/head"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "../../components/ui/dropdown-menu"
 import { Avatar, AvatarFallback } from "../../components/ui/avatar"
 import { ScrollArea } from "../../components/ui/scroll-area"
 import { Separator } from "../../components/ui/separator"
@@ -190,6 +184,7 @@ export default function Dashboard() {
   const scrollAreaRef = useRef(null)
 
   const [petToEdit, setPetToEdit] = useState(null)
+  const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false)
 
   const toggleDetailSidebar = () => setIsDetailSidebarOpen(!isDetailSidebarOpen)
   const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen)
@@ -615,6 +610,17 @@ export default function Dashboard() {
       </div>
     )
   }
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (isProfileDropdownOpen && !event.target.closest(".relative")) {
+        setIsProfileDropdownOpen(false)
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [isProfileDropdownOpen])
 
   return (
     <div className="flex h-screen bg-gray-100 text-gray-800">
@@ -1229,38 +1235,43 @@ export default function Dashboard() {
                     Book Vet
                   </Button>
                 </Link>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-                      <div className="flex items-center space-x-2">
-                        <div className="flex items-center justify-center h-10 w-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-white font-bold shadow-md border-2 border-[#222]">
-                          {session?.user?.name?.slice(0, 2).toUpperCase() || "US"}
-                        </div>
-                      </div>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent
-                    align="end"
-                    className="w-56 bg-white shadow-lg rounded-xl border border-gray-200"
+                <div className="relative">
+                  <button
+                    onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
+                    className="relative h-10 w-10 rounded-full focus:outline-none"
                   >
-                    <Link href="https://site.petowk.com/user/" target="_blank" rel="noopener">
-                      <DropdownMenuItem className="hover:bg-gray-100 rounded-xl">
-                        <User className="mr-2 h-4 w-4" />
-                        <span>Profile</span>
-                      </DropdownMenuItem>
-                    </Link>
-                    <DropdownMenuItem
-                      className="hover:bg-gray-100 rounded-xl"
-                      onClick={(e) => {
-                        e.preventDefault()
-                        signOut({ callbackUrl: "/" })
-                      }}
-                    >
-                      <LogOut className="mr-2 h-4 w-4" />
-                      <span>Log out</span>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                    <div className="flex items-center space-x-2">
+                      <div className="flex items-center justify-center h-10 w-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-white font-bold shadow-md border-2 border-[#222]">
+                        {session?.user?.name?.slice(0, 2).toUpperCase() || "US"}
+                      </div>
+                    </div>
+                  </button>
+
+                  {isProfileDropdownOpen && (
+                    <div className="absolute right-0 mt-2 w-56 bg-white shadow-xl rounded-xl border border-gray-200 z-[10000]">
+  <Link
+    href="https://site.petowk.com/user/"
+    target="_blank"
+    rel="noopener"
+    className="flex items-center px-4 py-3 text-sm text-gray-800 hover:bg-[#E8EDFF] hover:text-[#3661E8] transition-all duration-200 rounded-t-xl"
+  >
+    <User className="mr-2 h-4 w-4" />
+    <span>Profile</span>
+  </Link>
+  <button
+    className="flex items-center w-full text-left px-4 py-3 text-sm text-gray-800 hover:bg-[#E8EDFF] hover:text-[#3661E8] transition-all duration-200 rounded-b-xl"
+    onClick={(e) => {
+      e.preventDefault();
+      signOut({ callbackUrl: "/" });
+    }}
+  >
+    <LogOut className="mr-2 h-4 w-4" />
+    <span>Log out</span>
+  </button>
+</div>
+
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -1272,16 +1283,14 @@ export default function Dashboard() {
               <TooltipProvider delayDuration={300}>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                  <Button
-    onClick={scrollToTop}
-    className="fixed bottom-24 right-6 z-50 bg-[#f90000] hover:bg-red-700 text-white rounded-full shadow-lg p-4 transition-all duration-300 ease-in-out opacity-90 hover:opacity-100"
-    size="icon"
-    aria-label="Scroll to top"
->
-<ArrowUp className="h-6 w-6" stroke="white" />
-
-</Button>
-
+                    <Button
+                      onClick={scrollToTop}
+                      className="fixed bottom-24 right-6 z-50 bg-[#f90000] hover:bg-red-700 text-white rounded-full shadow-lg p-4 transition-all duration-300 ease-in-out opacity-90 hover:opacity-100"
+                      size="icon"
+                      aria-label="Scroll to top"
+                    >
+                      <ArrowUp className="h-6 w-6" stroke="white" />
+                    </Button>
                   </TooltipTrigger>
                   <TooltipContent
                     side="right"
@@ -1297,7 +1306,7 @@ export default function Dashboard() {
               <div className="">
                 {selectedPet ? (
                   <>
-                    <div className="text-center sticky top-0 bg-white z-10 p-4 ">
+                    <div className="text-center sticky top-0 bg-white z-1 p-4 ">
                       <h2 className="text-3xl font-bold mb-2 text-black">
                         Chat with PETOWK AI about {selectedPet.petName}
                       </h2>
@@ -1442,4 +1451,3 @@ export default function Dashboard() {
     </div>
   )
 }
-
